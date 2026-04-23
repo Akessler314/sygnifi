@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sygnifi — Field Intelligence Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1e3a5f;          /* Vandar Poel's Blue — replaces near-black */
+    --ink-deep: #152d4a;     /* deeper shade for topbar */
+    --paper: #f5f2e8;        /* Sulphur Yellow cream — unchanged */
+    --paper-dark: #ede8d5;
+    --accent: #c8722b;       /* Yellow Orange — shifted slightly warmer */
+    --accent-light: #f0e4d4;
+    --muted: #6b7f96;        /* blue-tinted muted */
+    --border: #d4cdb8;
+    --green: #2d6a4f;
+    --green-light: #d8f0e6;
+    --amber: #92610a;
+    --amber-light: #fef3dc;
+    --blue: #1e3a5f;
+    --blue-light: #dce8f5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--ink-deep);
+    color: var(--paper);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 2px 12px rgba(21,45,74,0.22);
+  }
+
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--paper);
+  }
+
+  .logo-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    animation: dot-glow 3s ease-in-out infinite;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 13px;
+    color: #a8bcd4;
+  }
+
+  .badge-live {
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    animation: badge-pulse 2.8s ease-in-out infinite;
+  }
+
+  /* VALIDATION BANNER */
+  .validation-banner {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 32px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.5;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .validation-banner strong {
+    color: #f5c89a;
+  }
+
+  .validation-banner em {
+    font-style: normal;
+    background: var(--accent);
+    color: white;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 6px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .validation-banner em:hover { opacity: 0.85; }
+
+  /* REPORT HEADER */
+  .report-header {
+    border-bottom: 1px solid var(--border);
+    padding: 32px 32px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .report-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  .report-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    max-width: 560px;
+    color: var(--ink-deep);
+  }
+
+  .report-title em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .report-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+
+  .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .btn-primary:hover { box-shadow: 0 4px 14px rgba(21,45,74,0.28); }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--ink);
+  }
+
+  .btn-secondary:hover { background: var(--paper-dark); }
+
+  .coverage-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+
+  .tag-sources { background: var(--paper-dark); color: var(--muted); }
+
+  /* SUMMARY STRIP */
+  .summary-strip {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 18px 32px;
+    display: flex;
+    gap: 40px;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .summary-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    line-height: 1;
+    color: white;
+  }
+
+  .summary-num span { color: var(--accent); }
+
+  .summary-label {
+    font-size: 11px;
+    color: #8aadcc;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-divider {
+    width: 1px;
+    background: #2a4f75;
+    margin: 4px 0;
+  }
+
+  /* SIGNAL BANNER */
+  .signal-banner {
+    margin: 24px 32px 0;
+    background: var(--accent-light);
+    border: 1px solid #e8c4a8;
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    animation: fadeUp 0.5s 0.15s ease both;
+  }
+
+  .signal-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  .signal-text strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+
+  .signal-text p { font-size: 13px; color: #5a3020; line-height: 1.5; }
+
+  /* MAIN GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+  }
+
+  .main-col {
+    padding: 28px 32px;
+    border-right: 1px solid var(--border);
+  }
+
+  .side-col { padding: 28px 24px; }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .see-all { font-size: 12px; color: var(--muted); cursor: pointer; transition: color 0.15s; }
+  .see-all:hover { color: var(--accent); }
+
+  /* PAPER CARDS */
+  .paper-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: white;
+    transition: box-shadow 0.2s, transform 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .paper-card:hover { box-shadow: 0 6px 20px rgba(30,58,95,0.1); transform: translateY(-1px); }
+  .paper-card:nth-child(1) { animation-delay: 0.2s; }
+  .paper-card:nth-child(2) { animation-delay: 0.3s; }
+  .paper-card:nth-child(3) { animation-delay: 0.4s; }
+
+  .paper-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .paper-title { font-size: 14px; font-weight: 600; line-height: 1.4; flex: 1; color: var(--ink-deep); }
+
+  .relevance-badge {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .rel-high { background: var(--green-light); color: var(--green); }
+  .rel-med { background: var(--amber-light); color: var(--amber); }
+  .rel-watch { background: var(--blue-light); color: var(--blue); }
+
+  .paper-summary { font-size: 13px; color: #444; line-height: 1.55; margin-bottom: 10px; }
+
+  .paper-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .why-matters {
+    background: var(--paper-dark);
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #555;
+    margin-top: 8px;
+    border-left: 3px solid var(--accent);
+  }
+
+  .why-matters strong {
+    color: var(--accent);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* PATENT CARDS */
+  .patent-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: white;
+    animation: fadeUp 0.4s ease both;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  .patent-card:hover { box-shadow: 0 4px 14px rgba(30,58,95,0.09); transform: translateY(-1px); }
+
+  .patent-card:nth-child(1) { animation-delay: 0.25s; }
+  .patent-card:nth-child(2) { animation-delay: 0.35s; }
+
+  .patent-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .patent-id { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+  .patent-status { font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 7px; border-radius: 4px; }
+  .status-filed { background: var(--amber-light); color: var(--amber); }
+  .status-granted { background: var(--green-light); color: var(--green); }
+
+  .patent-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; color: var(--ink-deep); }
+  .patent-assignee { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .patent-summary { font-size: 12px; color: #444; line-height: 1.5; }
+
+  .conflict-flag {
+    margin-top: 8px;
+    background: #fff0ed;
+    border: 1px solid #f0c4b8;
+    border-radius: 5px;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: #7a2a10;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  /* SIDEBAR */
+  .side-section { margin-bottom: 28px; animation: fadeUp 0.4s 0.3s ease both; }
+
+  /* FIELD PULSE */
+  .field-pulse {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 28px;
+  }
+
+  .pulse-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+  }
+
+  .pulse-body { font-size: 12px; color: #a8bcd4; line-height: 1.6; }
+  .pulse-body strong { color: white; }
+
+  /* COMPETITOR */
+  .competitor-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .competitor-item:last-child { border-bottom: none; }
+
+  .comp-header { display: flex; justify-content: space-between; align-items: center; }
+  .comp-name { font-weight: 600; font-size: 13px; color: var(--ink-deep); }
+
+  .comp-activity {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+
+  .activity-high { background: #fdecea; color: #c0392b; }
+  .activity-med { background: var(--amber-light); color: var(--amber); }
+  .activity-low { background: var(--paper-dark); color: var(--muted); }
+  .comp-detail { font-size: 12px; color: #555; line-height: 1.4; }
+
+  /* TRIALS */
+  .trial-item {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    margin-bottom: 8px;
+    background: white;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  .trial-item:hover { box-shadow: 0 3px 10px rgba(30,58,95,0.08); transform: translateY(-1px); }
+
+  .trial-phase {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--blue);
+    background: var(--blue-light);
+    padding: 2px 7px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+
+  .trial-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; line-height: 1.4; color: var(--ink-deep); }
+  .trial-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  /* ASK BOX */
+  .ask-box {
+    background: var(--paper-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .ask-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .ask-input {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    outline: none;
+    resize: none;
+    height: 64px;
+    transition: border-color 0.15s;
+  }
+
+  .ask-input:focus { border-color: var(--accent); }
+
+  .ask-btn {
+    margin-top: 8px;
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 9px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .ask-btn:hover { opacity: 0.88; }
+  .ask-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .ask-suggestions {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .suggestion-chip {
+    font-size: 11px;
+    color: var(--muted);
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    line-height: 1.3;
+    text-align: left;
+  }
+
+  .suggestion-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  /* ASK RESPONSE */
+  .ask-response {
+    margin-top: 10px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #333;
+    line-height: 1.6;
+    display: none;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .ask-response.visible { display: block; }
+
+  .ask-response-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .ask-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(21, 45, 74, 0.6);
+    backdrop-filter: blur(3px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--paper);
+    border-radius: 12px;
+    padding: 28px;
+    max-width: 440px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(21,45,74,0.25);
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.2s ease;
+  }
+
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+  .modal-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .modal-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--ink-deep);
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .modal-body {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .modal-body strong { color: var(--ink-deep); }
+
+  .modal-example {
+    background: var(--paper-dark);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: #555;
+    margin: 12px 0;
+    line-height: 1.5;
+  }
+
+  .modal-close {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    width: 100%;
+    transition: opacity 0.15s;
+  }
+
+  .modal-close:hover { opacity: 0.85; }
+
+  /* FOOTER */
+  .report-footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .footer-brand {
+    font-family: 'Instrument Serif', serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  .section-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* SIGNUP FORM */
+  .signup-field {
+    margin-bottom: 12px;
+  }
+
+  .signup-label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+
+  .signup-input {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .signup-input:focus { border-color: var(--accent); }
+
+  .signup-submit {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: opacity 0.15s;
+  }
+
+  .signup-submit:hover { opacity: 0.88; }
+  .signup-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .signup-success {
+    text-align: center;
+    padding: 12px 0 4px;
+  }
+
+  .signup-success-icon { font-size: 32px; margin-bottom: 10px; }
+
+  .signup-success h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    color: var(--ink-deep);
+    margin-bottom: 6px;
+  }
+
+  .signup-success p {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @keyframes badge-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes dot-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200,114,43,0); }
+    50% { box-shadow: 0 0 0 3px rgba(200,114,43,0.28); }
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--paper); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .topbar { padding: 0 16px; }
+
+    .validation-banner { padding: 10px 16px; }
+
+    .validation-banner em {
+      display: block;
+      margin-left: 0;
+      margin-top: 6px;
+      width: fit-content;
+    }
+
+    .report-header {
+      flex-direction: column;
+      padding: 20px 16px 16px;
+      gap: 16px;
+    }
+
+    .report-title { font-size: 24px; }
+
+    .report-actions {
+      align-items: flex-start;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .coverage-tags { justify-content: flex-start; }
+
+    .summary-strip {
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      overflow-x: visible;
+    }
+
+    .summary-divider { display: none; }
+
+    .summary-num { font-size: 22px; }
+
+    .signal-banner { margin: 16px 16px 0; }
+
+    .main-grid {
+      display: block;
+    }
+
+    .main-col {
+      padding: 20px 16px;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .side-col { padding: 20px 16px; }
+
+    .field-pulse { margin-bottom: 20px; }
+
+    .report-footer {
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-export">
+  <div class="modal">
+    <div class="modal-icon">📄</div>
+    <div class="modal-title">PDF export coming in V1</div>
+    <div class="modal-body">
+      Each weekly digest will be exportable as a clean, formatted PDF — ready to share with your team or attach to board updates.<br><br>
+      <strong>Planned for V1 launch.</strong> If this is important to you, let us know — it helps us prioritise.
+    </div>
+    <button class="modal-close" onclick="closeModal('modal-export')">Got it →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-signup">
+  <div class="modal">
+    <div id="signup-form-view">
+      <div class="modal-icon">🔬</div>
+      <div class="modal-title">Get early access</div>
+      <div class="modal-body">
+        Sygnifi is in early development. Leave your details and we'll reach out when it's ready — and ask you a few questions to make sure it fits your workflow.
+      </div>
+      <form id="signup-form" action="https://formspree.io/f/mrerrkqk" method="POST" onsubmit="handleSignup(event)">
+        <div class="signup-field">
+          <label class="signup-label" for="signup-name">Your name</label>
+          <input class="signup-input" id="signup-name" name="name" type="text" placeholder="Jane Smith" required />
+        </div>
+        <div class="signup-field">
+          <label class="signup-label" for="signup-email">Work email</label>
+          <input class="signup-input" id="signup-email" name="email" type="email" placeholder="jane@yourlabs.com" required />
+        </div>
+        <div class="signup-field">
+          <label class="signup-label" for="signup-org">Organisation</label>
+          <input class="signup-input" id="signup-org" name="organisation" type="text" placeholder="Research institute or company" />
+        </div>
+        <div class="signup-field">
+          <label class="signup-label" for="signup-research">What are you working on? <span style="color:var(--border)">(optional)</span></label>
+          <input class="signup-input" id="signup-research" name="research_area" type="text" placeholder="e.g. RUNX2 signalling in osteosarcoma" />
+        </div>
+        <button class="signup-submit" type="submit" id="signup-btn">Request access →</button>
+      </form>
+    </div>
+    <div id="signup-success-view" class="signup-success" style="display:none">
+      <div class="signup-success-icon">✓</div>
+      <h3>You're on the list</h3>
+      <p>We'll be in touch soon. In the meantime, feel free to explore the report and try the Ask Sygnifi box below.</p>
+      <button class="modal-close" style="margin-top:18px" onclick="closeModal('modal-signup')">Back to report →</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-share">
+  <div class="modal">
+    <div class="modal-icon">📬</div>
+    <div class="modal-title">Digest sharing coming in V1</div>
+    <div class="modal-body">
+      Share your weekly digest with colleagues via a private link or forwarded email — no account required for recipients.<br><br>
+      <strong>Planned for V1 launch.</strong> Team collaboration features follow in Pro tier.
+    </div>
+    <button class="modal-close" onclick="closeModal('modal-share')">Got it →</button>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-dot"></span>
+    Sygnifi
+  </div>
+  <div class="topbar-right">
+    <span>Your workspace</span>
+    <span class="badge-live">Weekly · Apr 20</span>
+  </div>
+</div>
+
+<!-- VALIDATION BANNER -->
+<div class="validation-banner">
+  <strong>This is an early preview of Sygnifi</strong> — a weekly field intelligence digest for cancer research teams. &nbsp;
+  <em onclick="openModal('modal-signup')">Request early access →</em>
+</div>
+
+<!-- REPORT HEADER -->
+<div class="report-header">
+  <div>
+    <div class="report-meta">Field Intelligence Report · Week 16, 2025 · KRAS G12C Inhibitor Resistance in NSCLC</div>
+    <div class="report-title">
+      5 developments reshaping the <em>KRAS G12C</em> resistance landscape in non-small cell lung cancer this week
+    </div>
+  </div>
+  <div class="report-actions">
+    <div class="coverage-tags">
+      <span class="tag tag-sources">PubMed</span>
+      <span class="tag tag-sources">USPTO / EPO</span>
+      <span class="tag tag-sources">ClinicalTrials.gov</span>
+      <span class="tag tag-sources">Competitor feeds</span>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('modal-export')">↓ Export PDF</button>
+    <button class="btn btn-secondary" onclick="openModal('modal-share')">Share digest</button>
+  </div>
+</div>
+
+<!-- SUMMARY STRIP -->
+<div class="summary-strip">
+  <div class="summary-item">
+    <div class="summary-num">12</div>
+    <div class="summary-label">New papers</div>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-item">
+    <div class="summary-num"><span>3</span></div>
+    <div class="summary-label">High relevance</div>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-item">
+    <div class="summary-num">2</div>
+    <div class="summary-label">Patent filings</div>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-item">
+    <div class="summary-num">1</div>
+    <div class="summary-label">Trial update</div>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-item">
+    <div class="summary-num"><span>!</span></div>
+    <div class="summary-label">Field signal</div>
+  </div>
+</div>
+
+<!-- SIGNAL BANNER -->
+<div class="signal-banner">
+  <div class="signal-icon">⚡</div>
+  <div class="signal-text">
+    <strong>Field signal this week</strong>
+    <p>A multi-centre ctDNA study from Dana-Farber and MD Anderson identified KRAS amplification as the dominant acquired resistance mechanism after sotorasib treatment — detected in 34% of progressive patients. Concurrent submissions to two major journals suggest this finding is about to shift front-line combination trial design.</p>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+
+  <div class="main-col">
+
+    <div class="section-header">
+      <div class="section-title">Recent Literature</div>
+      <a class="see-all">See all 12 →</a>
+    </div>
+
+    <div class="paper-card">
+      <div class="paper-top">
+        <div class="paper-title">STK11/KEAP1 co-mutations predict intrinsic resistance to KRAS G12C inhibitors independent of PD-L1 status in NSCLC</div>
+        <span class="relevance-badge rel-high">High</span>
+      </div>
+      <div class="paper-summary">
+        MD Anderson/Vanderbilt retrospective of 312 KRAS G12C NSCLC patients found STK11 loss correlated with primary resistance to both sotorasib and adagrasib (ORR 4% vs 42% in wild-type). KEAP1 co-mutation further worsened outcomes. Authors propose a biomarker triage algorithm for first-line treatment selection.
+      </div>
+      <div class="why-matters">
+        <strong>Why this matters to you</strong>
+        Directly challenges the assumption that G12C status alone is sufficient for patient selection — relevant if your programme includes biomarker-stratified claims or companion diagnostic positioning.
+      </div>
+      <div class="paper-footer">
+        <span>📄 Nature Medicine</span>
+        <span>📅 Apr 17, 2025</span>
+        <span>👥 Skoulidis et al.</span>
+      </div>
+    </div>
+
+    <div class="paper-card">
+      <div class="paper-top">
+        <div class="paper-title">Acquired KRAS G12C/G12D co-mutation as a novel on-target resistance mechanism to covalent G12C inhibitors identified by longitudinal ctDNA profiling</div>
+        <span class="relevance-badge rel-high">High</span>
+      </div>
+      <div class="paper-summary">
+        MSK/Dana-Farber ctDNA analysis of 87 patients progressing on sotorasib or adagrasib identified a novel G12D secondary mutation in 11% of cases — potentially non-crossresistant to non-covalent inhibitors. First prospective evidence this variant is selected for under treatment pressure.
+      </div>
+      <div class="why-matters">
+        <strong>Why this matters to you</strong>
+        Opens a resistance escape route that non-covalent or pan-KRAS approaches could address — watch for IP activity around G12D in this context.
+      </div>
+      <div class="paper-footer">
+        <span>📄 Cancer Discovery</span>
+        <span>📅 Apr 14, 2025</span>
+        <span>👥 Awad, Ou et al.</span>
+      </div>
+    </div>
+
+    <div class="paper-card">
+      <div class="paper-top">
+        <div class="paper-title">SOS1 inhibition synergises with KRAS G12C blockade to suppress adaptive RAS reactivation in NSCLC models</div>
+        <span class="relevance-badge rel-med">Watch</span>
+      </div>
+      <div class="paper-summary">
+        Boehringer Ingelheim-affiliated group demonstrated that BI-3406 (SOS1 inhibitor) substantially blunts adaptive feedback that limits G12C inhibitor durability in vitro and in PDX models. Combination index was favourable across six NSCLC cell lines tested. No clinical data yet.
+      </div>
+      <div class="paper-footer">
+        <span>📄 Cancer Cell</span>
+        <span>📅 Apr 11, 2025</span>
+        <span>👥 Fell et al.</span>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="section-header">
+      <div class="section-title">Patent Filings</div>
+      <a class="see-all">See all →</a>
+    </div>
+
+    <div class="patent-card">
+      <div class="patent-top">
+        <div>
+          <div class="patent-id">US2025/0191203 A1 · Filed Apr 8, 2025</div>
+          <div class="patent-title">Combination therapy comprising KRAS G12C inhibitor and SHP2 inhibitor for treatment of KRAS-mutant cancers resistant to prior KRAS inhibition</div>
+          <div class="patent-assignee">Assignee: Amgen Inc.</div>
+        </div>
+        <span class="patent-status status-filed">Application</span>
+      </div>
+      <div class="patent-summary">
+        Broad claims covering co-administration of sotorasib with RMC-4630 or TNO155 class SHP2 inhibitors. Method claims extend to re-treatment after acquired resistance. Strong overlap with combination strategies in active IND applications.
+      </div>
+      <div class="conflict-flag">
+        ⚠️ <span>Claim language around "re-treatment after acquired KRAS inhibitor resistance" is unusually broad — could read on any salvage combination approach in this space. Worth a legal review.</span>
+      </div>
+    </div>
+
+    <div class="patent-card">
+      <div class="patent-top">
+        <div>
+          <div class="patent-id">EP25181047 · Filed Apr 15, 2025</div>
+          <div class="patent-title">Tri-complex inhibitors targeting RAS(ON) G12C for treatment of cancers with acquired resistance to covalent KRAS G12C inhibitors</div>
+          <div class="patent-assignee">Assignee: Revolution Medicines Inc.</div>
+        </div>
+        <span class="patent-status status-filed">Application</span>
+      </div>
+      <div class="patent-summary">
+        European application covering RAS(ON) inhibitor scaffolds (non-covalent, active-state binders) with specific claims for use in patients who have progressed on sotorasib or adagrasib. Builds on published RMC-6236 Phase I data.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="side-col">
+
+    <div class="field-pulse side-section">
+      <div class="pulse-title">🧭 Where the field is heading</div>
+      <div class="pulse-body">
+        KRAS G12C research is bifurcating. <strong>One branch</strong> is pursuing vertical pathway co-inhibition (G12C + SHP2, MEK, or SOS1) to suppress adaptive reactivation — where most current IP is clustering. <strong>The other</strong> — faster-growing in academic output — is focused on non-covalent RAS(ON) inhibitors designed to work after covalent inhibitor failure. That gap may represent both a freedom-to-operate opportunity and a signal that the next-gen direct approach is harder to validate clinically.
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-header">
+        <div class="section-title">Competitor Activity</div>
+      </div>
+      <div class="competitor-item">
+        <div class="comp-header">
+          <div class="comp-name">Amgen</div>
+          <span class="comp-activity activity-high">↑ High</span>
+        </div>
+        <div class="comp-detail">Filed 2 patents in 10 days alongside CodeBreaK 101 cohort expansion — suggests a structured resistance programme, not exploratory combination work.</div>
+      </div>
+      <div class="competitor-item">
+        <div class="comp-header">
+          <div class="comp-name">Revolution Medicines</div>
+          <span class="comp-activity activity-med">→ Active</span>
+        </div>
+        <div class="comp-detail">EP filing follows RMC-6236 Phase I data. RAS(ON) approach specifically designed for the post-covalent-inhibitor resistance setting. Track their IND pipeline closely.</div>
+      </div>
+      <div class="competitor-item">
+        <div class="comp-header">
+          <div class="comp-name">Mirati / BMS</div>
+          <span class="comp-activity activity-low">◦ Watch</span>
+        </div>
+        <div class="comp-detail">No new patents but KRYSTAL-12 OS readout expected imminently. A positive result could redefine standard of care and reshape the entire resistance research agenda.</div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-header">
+        <div class="section-title">Trial Updates</div>
+      </div>
+      <div class="trial-item">
+        <span class="trial-phase">Phase I/II</span>
+        <div class="trial-title">CodeBreaK 101 Cohort H: Sotorasib + RMC-4630 in post-KRAS inhibitor NSCLC</div>
+        <div class="trial-meta">NCT06112847 · Amgen · Updated Apr 16</div>
+        <div style="margin-top: 6px; font-size: 12px; color: #555;">Cohort H (post-G12C inhibitor resistance) expanded from 30 to 55 patients following interim data review — typically signals tolerable safety in this setting. Key efficacy readout expected Q4 2025.</div>
+      </div>
+    </div>
+
+    <!-- ASK SYGNIFI -->
+    <div class="ask-box">
+      <div class="ask-label">Ask Sygnifi about this report</div>
+      <textarea class="ask-input" id="ask-input" placeholder="e.g. Does the Amgen SHP2 combination patent affect our freedom to operate in the resistance setting?"></textarea>
+      <button class="ask-btn" id="ask-btn" onclick="submitQuestion()">Ask →</button>
+      <div class="ask-suggestions">
+        <button class="suggestion-chip" onclick="fillSuggestion(this)">Is the Revolution Medicines RAS(ON) approach a direct competitive threat?</button>
+        <button class="suggestion-chip" onclick="fillSuggestion(this)">What resistance mechanisms are still unpatented and available to claim?</button>
+        <button class="suggestion-chip" onclick="fillSuggestion(this)">Should we be tracking the KRYSTAL-12 OS readout?</button>
+      </div>
+      <div class="ask-response" id="ask-response">
+        <div class="ask-response-label">Sygnifi analysis</div>
+        <div id="ask-response-text"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="report-footer">
+  <div>Sources: PubMed E-utilities · EPO OPS · USPTO · ClinicalTrials.gov v2 · Generated Apr 20, 2025</div>
+  <div class="footer-brand">Sygnifi</div>
+</div>
+
+<script>
+  // ── Signup form ────────────────────────────────────────────────
+  async function handleSignup(e) {
+    e.preventDefault();
+    const btn = document.getElementById('signup-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+      const form = document.getElementById('signup-form');
+      const data = new FormData(form);
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (res.ok) {
+        document.getElementById('signup-form-view').style.display = 'none';
+        document.getElementById('signup-success-view').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Try again';
+        alert('Something went wrong. Please try again.');
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Try again';
+      alert('Something went wrong. Please try again.');
+    }
+  }
+
+  // ── Modal helpers ──────────────────────────────────────────────
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  // ── Suggestion chips ───────────────────────────────────────────
+  function fillSuggestion(el) {
+    document.getElementById('ask-input').value = el.textContent.trim();
+    document.getElementById('ask-input').focus();
+  }
+
+  // ── Report context sent to Claude ─────────────────────────────
+  const REPORT_CONTEXT = `You are Sygnifi, a field intelligence assistant for early-stage cancer research teams.
+You are answering questions about a specific weekly report. Here is the full content of this week's report:
+
+STRICT SCOPE RULE: If the user's question is not related to the content of this report, the research area (RUNX2, cancer biology, patents, clinical trials, competitor activity), or scientific research generally, respond with exactly: "I can only answer questions about this report and the research it covers." Do not answer off-topic questions under any circumstances.
+
+RESEARCH AREA: KRAS G12C Inhibitor Resistance in NSCLC
+
+FIELD SIGNAL: A multi-centre ctDNA study from Dana-Farber and MD Anderson identified KRAS amplification as the dominant acquired resistance mechanism after sotorasib treatment — detected in 34% of progressive patients. Concurrent submissions to two major journals suggest this finding is about to shift front-line combination trial design.
+
+PAPERS THIS WEEK:
+1. "STK11/KEAP1 co-mutations predict intrinsic resistance to KRAS G12C inhibitors independent of PD-L1 status in NSCLC" — Nature Medicine, Apr 17. MD Anderson/Vanderbilt retrospective of 312 patients. STK11 loss: ORR 4% vs 42% in wild-type. KEAP1 co-mutation further worsened outcomes. Biomarker triage algorithm proposed for first-line selection. Relevance: HIGH.
+
+2. "Acquired KRAS G12C/G12D co-mutation as a novel on-target resistance mechanism to covalent G12C inhibitors identified by longitudinal ctDNA profiling" — Cancer Discovery, Apr 14. MSK/Dana-Farber ctDNA analysis of 87 patients. Novel G12D secondary mutation in 11% of progressors — potentially non-crossresistant to non-covalent inhibitors. Relevance: HIGH.
+
+3. "SOS1 inhibition synergises with KRAS G12C blockade to suppress adaptive RAS reactivation in NSCLC models" — Cancer Cell, Apr 11. Boehringer Ingelheim group. BI-3406 (SOS1 inhibitor) blunts adaptive feedback limiting G12C inhibitor durability across 6 NSCLC cell lines and PDX models. No clinical data yet. Relevance: WATCH.
+
+PATENTS THIS WEEK:
+1. US2025/0191203 A1 — Amgen Inc., filed Apr 8. Combination of sotorasib + SHP2 inhibitor (RMC-4630/TNO155 class). Method claims extend to re-treatment after acquired resistance. CONFLICT FLAG: claim language around "re-treatment after acquired KRAS inhibitor resistance" is unusually broad — could read on any salvage combination approach in this space.
+
+2. EP25181047 — Revolution Medicines Inc., filed Apr 15. RAS(ON) tri-complex inhibitor scaffolds (non-covalent, active-state binders) with claims specific to use in patients who have progressed on sotorasib or adagrasib. Builds on RMC-6236 Phase I data.
+
+CLINICAL TRIALS:
+- NCT06112847: CodeBreaK 101 Cohort H (sotorasib + RMC-4630), Phase I/II, post-KRAS inhibitor NSCLC. Cohort expanded 30→55 patients. Key efficacy readout expected Q4 2025.
+
+COMPETITOR ACTIVITY:
+- Amgen: HIGH activity. 2 patents in 10 days + CodeBreaK 101 cohort expansion = structured resistance programme.
+- Revolution Medicines: ACTIVE. EP filing follows RMC-6236 Phase I data. RAS(ON) approach specifically targeting post-covalent-inhibitor resistance setting.
+- Mirati/BMS: WATCH. No new patents. KRYSTAL-12 OS readout expected imminently — if positive, could redefine standard of care and reshape resistance research agenda.
+
+FIELD DIRECTION: KRAS G12C research bifurcating — vertical pathway co-inhibition (G12C + SHP2/MEK/SOS1) to suppress adaptive reactivation vs non-covalent RAS(ON) inhibitors for post-resistance setting. Patent activity clusters around combination branch; academic momentum favours next-gen direct inhibition. Gap may represent freedom-to-operate opportunity or signal that next-gen approach is harder to validate clinically.
+
+Answer questions concisely and analytically. Be specific, cite the relevant papers/patents/signals from this report. Keep responses to 3–5 sentences unless the question requires more depth. You are speaking to a scientist or COO at an early-stage biotech company.`;
+
+  // ── Claude API call (via proxy) ────────────────────────────────
+  // PROXY_URL will be replaced with your Cloudflare Worker URL after deployment
+  const PROXY_URL = 'https://sygnifi-proxy.andrewmcc.workers.dev';
+
+  async function submitQuestion() {
+    const input = document.getElementById('ask-input');
+    const btn = document.getElementById('ask-btn');
+    const responseBox = document.getElementById('ask-response');
+    const responseText = document.getElementById('ask-response-text');
+
+    const question = input.value.trim();
+    if (!question) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Thinking…';
+    responseText.innerHTML = '<span class="ask-spinner"></span> Analysing report…';
+    responseBox.classList.add('visible');
+
+    try {
+      const res = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 400,
+          system: REPORT_CONTEXT,
+          messages: [{ role: 'user', content: question }]
+        })
+      });
+
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+
+      const data = await res.json();
+      const answer = data.content?.[0]?.text || 'No response received.';
+      responseText.textContent = answer;
+
+    } catch (err) {
+      responseText.innerHTML = '<em style="color:#c0392b">Something went wrong. Please try again.</em>';
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Ask →';
+    }
+  }
+
+  // Allow Enter (without shift) to submit
+  document.getElementById('ask-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitQuestion();
+    }
+  });
+</script>
+
+</body>
+</html>
