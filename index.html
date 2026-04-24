@@ -113,10 +113,21 @@
     font-weight: 600;
     margin-left: 6px;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, background 0.15s;
   }
 
   .validation-banner em:hover { opacity: 0.85; }
+
+  .validation-banner em:first-of-type {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.35);
+    color: #d8e8f5;
+  }
+
+  .validation-banner em:first-of-type:hover {
+    background: rgba(255,255,255,0.1);
+    opacity: 1;
+  }
 
   /* REPORT HEADER */
   .report-header {
@@ -270,6 +281,35 @@
 
   .signal-text p { font-size: 13px; color: #5a3020; line-height: 1.5; }
 
+  /* DEMO NOTICE */
+  .demo-notice {
+    margin: 12px 32px 0;
+    background: var(--blue-light);
+    border: 1px solid #b8cfe8;
+    border-radius: 6px;
+    padding: 9px 14px;
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .demo-notice strong { color: var(--ink-deep); font-weight: 600; }
+
+  .demo-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1px 7px;
+    border-radius: 3px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
   /* MAIN GRID */
   .main-grid {
     display: grid;
@@ -321,14 +361,19 @@
     padding: 16px;
     margin-bottom: 12px;
     background: white;
-    transition: box-shadow 0.2s, transform 0.2s;
-    animation: fadeUp 0.4s ease both;
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+    animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
-  .paper-card:hover { box-shadow: 0 6px 20px rgba(30,58,95,0.1); transform: translateY(-1px); }
-  .paper-card:nth-child(1) { animation-delay: 0.2s; }
-  .paper-card:nth-child(2) { animation-delay: 0.3s; }
-  .paper-card:nth-child(3) { animation-delay: 0.4s; }
+  .paper-card:hover {
+    box-shadow: 0 2px 4px rgba(30,58,95,0.04), 0 8px 24px rgba(30,58,95,0.1);
+    transform: translateY(-2px);
+    border-color: #c0b8a0;
+  }
+
+  .paper-card:nth-child(1) { animation-delay: 0.15s; }
+  .paper-card:nth-child(2) { animation-delay: 0.25s; }
+  .paper-card:nth-child(3) { animation-delay: 0.35s; }
 
   .paper-top {
     display: flex;
@@ -361,6 +406,9 @@
     font-size: 11px;
     color: var(--muted);
     font-family: 'DM Mono', monospace;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 10px;
   }
 
   .why-matters {
@@ -370,8 +418,12 @@
     font-size: 12px;
     color: #555;
     margin-top: 8px;
+    margin-bottom: 10px;
     border-left: 3px solid var(--accent);
+    transition: background 0.2s;
   }
+
+  .paper-card:hover .why-matters { background: #e8e2cc; }
 
   .why-matters strong {
     color: var(--accent);
@@ -390,11 +442,15 @@
     padding: 14px 16px;
     margin-bottom: 10px;
     background: white;
-    animation: fadeUp 0.4s ease both;
-    transition: box-shadow 0.2s, transform 0.2s;
+    animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
   }
 
-  .patent-card:hover { box-shadow: 0 4px 14px rgba(30,58,95,0.09); transform: translateY(-1px); }
+  .patent-card:hover {
+    box-shadow: 0 2px 4px rgba(30,58,95,0.04), 0 6px 18px rgba(30,58,95,0.09);
+    transform: translateY(-2px);
+    border-color: #c0b8a0;
+  }
 
   .patent-card:nth-child(1) { animation-delay: 0.25s; }
   .patent-card:nth-child(2) { animation-delay: 0.35s; }
@@ -439,6 +495,12 @@
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 28px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.15);
+    transition: box-shadow 0.25s ease;
+  }
+
+  .field-pulse:hover {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.15), 0 4px 16px rgba(21,45,74,0.2);
   }
 
   .pulse-title {
@@ -456,11 +518,19 @@
 
   /* COMPETITOR */
   .competitor-item {
-    padding: 12px 0;
+    padding: 12px 0 12px 0;
     border-bottom: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     gap: 4px;
+    border-left: 2px solid transparent;
+    padding-left: 0;
+    transition: border-color 0.2s ease, padding-left 0.2s ease;
+  }
+
+  .competitor-item:hover {
+    border-left-color: var(--accent);
+    padding-left: 10px;
   }
 
   .competitor-item:last-child { border-bottom: none; }
@@ -487,10 +557,14 @@
     border-radius: 7px;
     margin-bottom: 8px;
     background: white;
-    transition: box-shadow 0.2s, transform 0.2s;
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
   }
 
-  .trial-item:hover { box-shadow: 0 3px 10px rgba(30,58,95,0.08); transform: translateY(-1px); }
+  .trial-item:hover {
+    box-shadow: 0 2px 4px rgba(30,58,95,0.04), 0 6px 16px rgba(30,58,95,0.08);
+    transform: translateY(-2px);
+    border-color: #c0b8a0;
+  }
 
   .trial-phase {
     font-family: 'DM Mono', monospace;
@@ -790,7 +864,7 @@
   }
 
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
@@ -852,6 +926,7 @@
     .summary-num { font-size: 22px; }
 
     .signal-banner { margin: 16px 16px 0; }
+    .demo-notice { margin: 10px 16px 0; }
 
     .main-grid {
       display: block;
@@ -914,7 +989,7 @@
         </div>
         <div class="signup-field">
           <label class="signup-label" for="signup-research">What are you working on? <span style="color:var(--border)">(optional)</span></label>
-          <input class="signup-input" id="signup-research" name="research_area" type="text" placeholder="e.g. RUNX2 signalling in osteosarcoma" />
+          <input class="signup-input" id="signup-research" name="research_area" type="text" placeholder="e.g. KRAS G12C inhibitor resistance in NSCLC" />
         </div>
         <button class="signup-submit" type="submit" id="signup-btn">Request access →</button>
       </form>
@@ -940,6 +1015,21 @@
   </div>
 </div>
 
+<!-- WHAT IS SYGNIFI MODAL -->
+<div class="modal-overlay" id="modal-what">
+  <div class="modal">
+    <div class="modal-icon">🧭</div>
+    <div class="modal-title">Your team shouldn't need a dedicated analyst to know what's happening in their field</div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px">Operations and science leads at early-stage biotechs spend hours each week manually tracking papers, patents, and competitor moves. Or worse, they don't track them at all. Important signals get missed. Decisions get made on stale context.</p>
+      <p style="margin-bottom:12px">Sygnifi monitors PubMed, patent databases, clinical trial registries, and competitor signals automatically, then delivers a weekly digest contextualised to your specific research area. An AI layer lets you ask questions directly about what's surfaced, so you can focus on what actually matters: the science.</p>
+      <p>This is an early demo. If something you'd want isn't here yet, we'd love to hear about it. We're building in the open and want the people using it to shape what gets built first.</p>
+    </div>
+    <button class="modal-close" onclick="closeModal('modal-what'); openModal('modal-signup')">Request early access →</button>
+    <button class="modal-close" style="margin-top:8px; background: transparent; border: 1px solid var(--border); color: var(--ink);" onclick="closeModal('modal-what')">Back to report</button>
+  </div>
+</div>
+
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="logo">
@@ -954,7 +1044,8 @@
 
 <!-- VALIDATION BANNER -->
 <div class="validation-banner">
-  <strong>This is an early preview of Sygnifi</strong> — a weekly field intelligence digest for cancer research teams. &nbsp;
+  <strong>This is an early preview of Sygnifi</strong> — a weekly field intelligence digest for biotech research teams. &nbsp;
+  <em onclick="openModal('modal-what')">What is Sygnifi?</em>
   <em onclick="openModal('modal-signup')">Request early access →</em>
 </div>
 
@@ -1013,6 +1104,12 @@
     <strong>Field signal this week</strong>
     <p>A multi-centre ctDNA study from Dana-Farber and MD Anderson identified KRAS amplification as the dominant acquired resistance mechanism after sotorasib treatment — detected in 34% of progressive patients. Concurrent submissions to two major journals suggest this finding is about to shift front-line combination trial design.</p>
   </div>
+</div>
+
+<!-- DEMO NOTICE -->
+<div class="demo-notice">
+  <span class="demo-tag">Demo report</span>
+  In production, this digest is generated fresh each week for <strong>your specific research area</strong> and delivered every Monday morning.
 </div>
 
 <!-- MAIN GRID -->
@@ -1249,7 +1346,7 @@
   const REPORT_CONTEXT = `You are Sygnifi, a field intelligence assistant for early-stage cancer research teams.
 You are answering questions about a specific weekly report. Here is the full content of this week's report:
 
-STRICT SCOPE RULE: If the user's question is not related to the content of this report, the research area (RUNX2, cancer biology, patents, clinical trials, competitor activity), or scientific research generally, respond with exactly: "I can only answer questions about this report and the research it covers." Do not answer off-topic questions under any circumstances.
+BEHAVIOUR: You are a helpful field intelligence assistant. Answer genuine science questions openly and helpfully. For questions completely unrelated to science, research, or biotech, respond briefly and redirect to the report. If asked about features not visible in this demo, respond warmly: "This is an early demo — that functionality is on the roadmap. If it matters to you, mention it when you request access and it'll help shape what gets built first." Never refuse science questions.
 
 RESEARCH AREA: KRAS G12C Inhibitor Resistance in NSCLC
 
