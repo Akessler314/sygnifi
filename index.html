@@ -385,6 +385,18 @@
 
   .paper-title { font-size: 14px; font-weight: 600; line-height: 1.4; flex: 1; color: var(--ink-deep); }
 
+  .paper-title a { color: inherit; text-decoration: none; transition: color 0.15s; }
+  .paper-title a:hover { color: var(--accent); }
+  .paper-title a::after {
+    content: ' ↗';
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--border);
+    vertical-align: super;
+    transition: color 0.15s;
+  }
+  .paper-title a:hover::after { color: var(--accent); }
+
   .relevance-badge {
     font-size: 11px;
     font-family: 'DM Mono', monospace;
@@ -1102,7 +1114,7 @@
   <div class="signal-icon">⚡</div>
   <div class="signal-text">
     <strong>Field signal this week</strong>
-    <p>A multi-centre ctDNA study from Dana-Farber and MD Anderson identified KRAS amplification as the dominant acquired resistance mechanism after sotorasib treatment — detected in 34% of progressive patients. Concurrent submissions to two major journals suggest this finding is about to shift front-line combination trial design.</p>
+    <p>Revolution Medicines published clinical proof-of-concept for RAS(ON) inhibition overcoming G12C(OFF) resistance this week, coinciding with Frontier Medicines receiving a US patent grant for dual ON/OFF inhibitor compounds. Converging activity around the resistance mechanism space — two independent programmes validating the same vulnerability within weeks of each other.</p>
   </div>
 </div>
 
@@ -1124,54 +1136,54 @@
 
     <div class="paper-card">
       <div class="paper-top">
-        <div class="paper-title">STK11/KEAP1 co-mutations predict intrinsic resistance to KRAS G12C inhibitors independent of PD-L1 status in NSCLC</div>
+        <div class="paper-title"><a href="https://www.science.org/doi/10.1126/sciadv.adq4274" target="_blank" rel="noopener">SRC kinase drives multidrug resistance induced by KRAS-G12C inhibition</a></div>
         <span class="relevance-badge rel-high">High</span>
       </div>
       <div class="paper-summary">
-        MD Anderson/Vanderbilt retrospective of 312 KRAS G12C NSCLC patients found STK11 loss correlated with primary resistance to both sotorasib and adagrasib (ORR 4% vs 42% in wild-type). KEAP1 co-mutation further worsened outcomes. Authors propose a biomarker triage algorithm for first-line treatment selection.
+        A genome-wide CRISPR screen showed that adagrasib (MRTX849) induces multidrug resistance in NSCLC by upregulating the ABCC1 transporter via SRC-mediated JUN activation. The SRC inhibitor dasatinib was identified as a combination partner that potentiates MRTX849 efficacy and suppresses this resistance pathway in patient-derived organoids.
       </div>
       <div class="why-matters">
         <strong>Why this matters to you</strong>
-        Directly challenges the assumption that G12C status alone is sufficient for patient selection — relevant if your programme includes biomarker-stratified claims or companion diagnostic positioning.
+        Identifies a specific, druggable resistance mechanism — if your programme targets post-G12Ci failure patients, this is directly relevant to combination strategy.
       </div>
       <div class="paper-footer">
-        <span>📄 Nature Medicine</span>
-        <span>📅 Apr 17, 2025</span>
-        <span>👥 Skoulidis et al.</span>
+        <span>📄 Science Advances</span>
+        <span>📅 Dec 2024</span>
+        <span>👥 Okumura et al.</span>
       </div>
     </div>
 
     <div class="paper-card">
       <div class="paper-top">
-        <div class="paper-title">Acquired KRAS G12C/G12D co-mutation as a novel on-target resistance mechanism to covalent G12C inhibitors identified by longitudinal ctDNA profiling</div>
+        <div class="paper-title"><a href="https://www.nature.com/articles/s41467-024-51828-2" target="_blank" rel="noopener">RAS-ON inhibition overcomes clinical resistance to KRAS G12C-OFF covalent blockade</a></div>
         <span class="relevance-badge rel-high">High</span>
       </div>
       <div class="paper-summary">
-        MSK/Dana-Farber ctDNA analysis of 87 patients progressing on sotorasib or adagrasib identified a novel G12D secondary mutation in 11% of cases — potentially non-crossresistant to non-covalent inhibitors. First prospective evidence this variant is selected for under treatment pressure.
+        Using patient-derived models from a sotorasib-resistant NSCLC case, the authors show that increased KRAS-GTP loading drives adaptive resistance to OFF-state inhibitors. RMC-6291, a clinical-stage KRAS G12C(ON) inhibitor, alone or combined with OFF-state drugs, restored tumour suppression in these resistant models.
       </div>
       <div class="why-matters">
         <strong>Why this matters to you</strong>
-        Opens a resistance escape route that non-covalent or pan-KRAS approaches could address — watch for IP activity around G12D in this context.
+        Proof-of-concept for RAS(ON) inhibitors as a next-generation approach — directly relevant if your programme targets the GTP-bound state or combination sequencing.
       </div>
       <div class="paper-footer">
-        <span>📄 Cancer Discovery</span>
-        <span>📅 Apr 14, 2025</span>
-        <span>👥 Awad, Ou et al.</span>
+        <span>📄 Nature Communications</span>
+        <span>📅 Aug 2024</span>
+        <span>👥 Nokin, Mira et al.</span>
       </div>
     </div>
 
     <div class="paper-card">
       <div class="paper-top">
-        <div class="paper-title">SOS1 inhibition synergises with KRAS G12C blockade to suppress adaptive RAS reactivation in NSCLC models</div>
+        <div class="paper-title"><a href="https://www.cell.com/iscience/fulltext/S2589-0042(25)02690-2" target="_blank" rel="noopener">Tumor suppressor gene co-mutations orchestrate resistance to KRAS G12C inhibitors in NSCLC</a></div>
         <span class="relevance-badge rel-med">Watch</span>
       </div>
       <div class="paper-summary">
-        Boehringer Ingelheim-affiliated group demonstrated that BI-3406 (SOS1 inhibitor) substantially blunts adaptive feedback that limits G12C inhibitor durability in vitro and in PDX models. Combination index was favourable across six NSCLC cell lines tested. No clinical data yet.
+        Review and analysis showing that co-occurring mutations in STK11/LKB1, KEAP1, TP53, and CDKN2A/B are the dominant drivers of primary and acquired resistance, working through sustained proliferation, metabolic reprogramming, and immune microenvironment remodelling. No single bypass pathway accounts for resistance — it is heterogeneous.
       </div>
       <div class="paper-footer">
-        <span>📄 Cancer Cell</span>
-        <span>📅 Apr 11, 2025</span>
-        <span>👥 Fell et al.</span>
+        <span>📄 iScience</span>
+        <span>📅 Dec 2025</span>
+        <span>👥 Cell Press / Elsevier</span>
       </div>
     </div>
 
@@ -1185,31 +1197,31 @@
     <div class="patent-card">
       <div class="patent-top">
         <div>
-          <div class="patent-id">US2025/0191203 A1 · Filed Apr 8, 2025</div>
-          <div class="patent-title">Combination therapy comprising KRAS G12C inhibitor and SHP2 inhibitor for treatment of KRAS-mutant cancers resistant to prior KRAS inhibition</div>
-          <div class="patent-assignee">Assignee: Amgen Inc.</div>
+          <div class="patent-id">US12291539B2 · Granted Mar 2025</div>
+          <div class="patent-title">Dual KRAS G12C (ON) and (OFF) inhibitor compounds for treatment of resistant cancers</div>
+          <div class="patent-assignee">Assignee: Frontier Medicines Corporation</div>
         </div>
-        <span class="patent-status status-filed">Application</span>
+        <span class="patent-status status-granted">Granted</span>
       </div>
       <div class="patent-summary">
-        Broad claims covering co-administration of sotorasib with RMC-4630 or TNO155 class SHP2 inhibitors. Method claims extend to re-treatment after acquired resistance. Strong overlap with combination strategies in active IND applications.
+        Claims covering small molecule compounds designed to bind and inhibit both GDP-bound and GTP-bound forms of KRAS G12C — directly targeting the limitation of current approved OFF-state inhibitors. Broad claims across NSCLC, CRC, and PDAC.
       </div>
       <div class="conflict-flag">
-        ⚠️ <span>Claim language around "re-treatment after acquired KRAS inhibitor resistance" is unusually broad — could read on any salvage combination approach in this space. Worth a legal review.</span>
+        ⚠️ <span>Broad dual-state inhibition claims — if your approach targets KRAS in either conformational state, this is worth a freedom-to-operate read.</span>
       </div>
     </div>
 
     <div class="patent-card">
       <div class="patent-top">
         <div>
-          <div class="patent-id">EP25181047 · Filed Apr 15, 2025</div>
-          <div class="patent-title">Tri-complex inhibitors targeting RAS(ON) G12C for treatment of cancers with acquired resistance to covalent KRAS G12C inhibitors</div>
-          <div class="patent-assignee">Assignee: Revolution Medicines Inc.</div>
+          <div class="patent-id">PCT/US2022/079324 · National stage filed 2024</div>
+          <div class="patent-title">KRAS G12C inhibitor compounds with activity against resistance mutations</div>
+          <div class="patent-assignee">Assignee: Frontier Medicines Corporation</div>
         </div>
         <span class="patent-status status-filed">Application</span>
       </div>
       <div class="patent-summary">
-        European application covering RAS(ON) inhibitor scaffolds (non-covalent, active-state binders) with specific claims for use in patients who have progressed on sotorasib or adagrasib. Builds on published RMC-6236 Phase I data.
+        Method and composition claims for next-generation G12C inhibitors designed to retain activity against secondary resistance mutations (R68S, Y96C) that arise under sotorasib and adagrasib treatment. Continuation of an active filing programme.
       </div>
     </div>
 
@@ -1221,7 +1233,7 @@
     <div class="field-pulse side-section">
       <div class="pulse-title">🧭 Where the field is heading</div>
       <div class="pulse-body">
-        KRAS G12C research is bifurcating. <strong>One branch</strong> is pursuing vertical pathway co-inhibition (G12C + SHP2, MEK, or SOS1) to suppress adaptive reactivation — where most current IP is clustering. <strong>The other</strong> — faster-growing in academic output — is focused on non-covalent RAS(ON) inhibitors designed to work after covalent inhibitor failure. That gap may represent both a freedom-to-operate opportunity and a signal that the next-gen direct approach is harder to validate clinically.
+        KRAS G12C research is bifurcating. One branch is pursuing vertical pathway co-inhibition (G12C + SHP2, MEK, or SOS1) to suppress adaptive reactivation — where most current IP is clustering. The other — faster-growing in academic output and now with clinical proof-of-concept — is focused on non-covalent RAS(ON) inhibitors designed to work after covalent inhibitor failure. Frontier Medicines' granted dual ON/OFF patent and Revolution Medicines' clinical data are converging signals that the next-gen direct approach is being validated in parallel by multiple independent programmes.
       </div>
     </div>
 
@@ -1231,24 +1243,24 @@
       </div>
       <div class="competitor-item">
         <div class="comp-header">
-          <div class="comp-name">Amgen</div>
+          <div class="comp-name">Revolution Medicines</div>
           <span class="comp-activity activity-high">↑ High</span>
         </div>
-        <div class="comp-detail">Filed 2 patents in 10 days alongside CodeBreaK 101 cohort expansion — suggests a structured resistance programme, not exploratory combination work.</div>
+        <div class="comp-detail">RMC-6291 (elironrasib) advancing in Phase I/II for post-G12Ci failure patients — first RAS(ON) inhibitor with clinical proof-of-concept. Their Nature Communications paper this week adds academic validation to a commercial programme that is clearly maturing fast.</div>
       </div>
       <div class="competitor-item">
         <div class="comp-header">
-          <div class="comp-name">Revolution Medicines</div>
+          <div class="comp-name">Amgen</div>
           <span class="comp-activity activity-med">→ Active</span>
         </div>
-        <div class="comp-detail">EP filing follows RMC-6236 Phase I data. RAS(ON) approach specifically designed for the post-covalent-inhibitor resistance setting. Track their IND pipeline closely.</div>
+        <div class="comp-detail">CodeBreaK programme continues with sotorasib combinations. Recent Nature Medicine biomarker analysis (May 2025) identifies TTF-1 low / NRF2 high expression as predictors of poor sotorasib response — signals Amgen is building a patient selection layer around the approved drug.</div>
       </div>
       <div class="competitor-item">
         <div class="comp-header">
           <div class="comp-name">Mirati / BMS</div>
           <span class="comp-activity activity-low">◦ Watch</span>
         </div>
-        <div class="comp-detail">No new patents but KRYSTAL-12 OS readout expected imminently. A positive result could redefine standard of care and reshape the entire resistance research agenda.</div>
+        <div class="comp-detail">KRYSTAL-7 combination data with pembrolizumab is the most significant near-term readout. 63% ORR in PD-L1 high patients is notable. Full trial data could reshape first-line treatment sequencing if it holds.</div>
       </div>
     </div>
 
@@ -1257,10 +1269,10 @@
         <div class="section-title">Trial Updates</div>
       </div>
       <div class="trial-item">
-        <span class="trial-phase">Phase I/II</span>
-        <div class="trial-title">CodeBreaK 101 Cohort H: Sotorasib + RMC-4630 in post-KRAS inhibitor NSCLC</div>
-        <div class="trial-meta">NCT06112847 · Amgen · Updated Apr 16</div>
-        <div style="margin-top: 6px; font-size: 12px; color: #555;">Cohort H (post-G12C inhibitor resistance) expanded from 30 to 55 patients following interim data review — typically signals tolerable safety in this setting. Key efficacy readout expected Q4 2025.</div>
+        <span class="trial-phase">Phase II</span>
+        <div class="trial-title">KRYSTAL-7: Adagrasib + pembrolizumab in treatment-naïve KRAS G12C NSCLC</div>
+        <div class="trial-meta">NCT04613596 · Mirati/BMS · Active</div>
+        <div style="margin-top: 6px; font-size: 12px; color: #555;">Among 148 patients enrolled, confirmed ORR of 63% in PD-L1 TPS ≥50% subgroup. Two grade 5 TRAEs reported. Full dataset readout pending — combination immunotherapy is the most watched near-term signal in this space.</div>
       </div>
     </div>
 
@@ -1350,29 +1362,29 @@ BEHAVIOUR: You are a helpful field intelligence assistant. Answer genuine scienc
 
 RESEARCH AREA: KRAS G12C Inhibitor Resistance in NSCLC
 
-FIELD SIGNAL: A multi-centre ctDNA study from Dana-Farber and MD Anderson identified KRAS amplification as the dominant acquired resistance mechanism after sotorasib treatment — detected in 34% of progressive patients. Concurrent submissions to two major journals suggest this finding is about to shift front-line combination trial design.
+FIELD SIGNAL: Revolution Medicines published clinical proof-of-concept for RAS(ON) inhibition overcoming G12C(OFF) resistance this week, coinciding with Frontier Medicines receiving a US patent grant for dual ON/OFF inhibitor compounds. Converging activity around the resistance mechanism space — two independent programmes validating the same vulnerability within weeks of each other.
 
 PAPERS THIS WEEK:
-1. "STK11/KEAP1 co-mutations predict intrinsic resistance to KRAS G12C inhibitors independent of PD-L1 status in NSCLC" — Nature Medicine, Apr 17. MD Anderson/Vanderbilt retrospective of 312 patients. STK11 loss: ORR 4% vs 42% in wild-type. KEAP1 co-mutation further worsened outcomes. Biomarker triage algorithm proposed for first-line selection. Relevance: HIGH.
+1. "SRC kinase drives multidrug resistance induced by KRAS-G12C inhibition" — Science Advances, Dec 2024. Okumura et al. Genome-wide CRISPR screen showing adagrasib (MRTX849) induces multidrug resistance via ABCC1 transporter upregulation through SRC-mediated JUN activation. SRC inhibitor dasatinib potentiates MRTX849 in patient-derived organoids. DOI: 10.1126/sciadv.adq4274. Relevance: HIGH.
 
-2. "Acquired KRAS G12C/G12D co-mutation as a novel on-target resistance mechanism to covalent G12C inhibitors identified by longitudinal ctDNA profiling" — Cancer Discovery, Apr 14. MSK/Dana-Farber ctDNA analysis of 87 patients. Novel G12D secondary mutation in 11% of progressors — potentially non-crossresistant to non-covalent inhibitors. Relevance: HIGH.
+2. "RAS-ON inhibition overcomes clinical resistance to KRAS G12C-OFF covalent blockade" — Nature Communications, Aug 2024. Nokin, Mira et al. Patient-derived models from sotorasib-resistant NSCLC show increased KRAS-GTP loading drives adaptive resistance to OFF-state inhibitors. RMC-6291 (clinical-stage KRAS G12C(ON) inhibitor), alone or combined with OFF-state drugs, restored tumour suppression in resistant models. Relevance: HIGH.
 
-3. "SOS1 inhibition synergises with KRAS G12C blockade to suppress adaptive RAS reactivation in NSCLC models" — Cancer Cell, Apr 11. Boehringer Ingelheim group. BI-3406 (SOS1 inhibitor) blunts adaptive feedback limiting G12C inhibitor durability across 6 NSCLC cell lines and PDX models. No clinical data yet. Relevance: WATCH.
+3. "Tumor suppressor gene co-mutations orchestrate resistance to KRAS G12C inhibitors in NSCLC" — iScience, Dec 2025. Cell Press / Elsevier. Co-occurring mutations in STK11/LKB1, KEAP1, TP53, and CDKN2A/B are the dominant drivers of primary and acquired resistance via sustained proliferation, metabolic reprogramming, and immune microenvironment remodelling. Resistance is heterogeneous — no single bypass pathway dominates. Relevance: WATCH.
 
 PATENTS THIS WEEK:
-1. US2025/0191203 A1 — Amgen Inc., filed Apr 8. Combination of sotorasib + SHP2 inhibitor (RMC-4630/TNO155 class). Method claims extend to re-treatment after acquired resistance. CONFLICT FLAG: claim language around "re-treatment after acquired KRAS inhibitor resistance" is unusually broad — could read on any salvage combination approach in this space.
+1. US12291539B2 — Frontier Medicines Corporation, granted Mar 2025. Dual KRAS G12C (ON) and (OFF) inhibitor compounds. Small molecules binding both GDP-bound and GTP-bound KRAS G12C. Broad claims across NSCLC, CRC, and PDAC. CONFLICT FLAG: broad dual-state inhibition claims — if your approach targets KRAS in either conformational state, this is worth a freedom-to-operate read.
 
-2. EP25181047 — Revolution Medicines Inc., filed Apr 15. RAS(ON) tri-complex inhibitor scaffolds (non-covalent, active-state binders) with claims specific to use in patients who have progressed on sotorasib or adagrasib. Builds on RMC-6236 Phase I data.
+2. PCT/US2022/079324 — Frontier Medicines Corporation, national stage filed 2024. Next-generation G12C inhibitors retaining activity against secondary resistance mutations R68S and Y96C arising under sotorasib and adagrasib treatment. Continuation of an active filing programme.
 
 CLINICAL TRIALS:
-- NCT06112847: CodeBreaK 101 Cohort H (sotorasib + RMC-4630), Phase I/II, post-KRAS inhibitor NSCLC. Cohort expanded 30→55 patients. Key efficacy readout expected Q4 2025.
+- NCT04613596: KRYSTAL-7, adagrasib + pembrolizumab, Phase II, treatment-naïve KRAS G12C NSCLC. Mirati/BMS. 148 patients enrolled, confirmed ORR 63% in PD-L1 TPS ≥50% subgroup. Two grade 5 TRAEs. Full readout pending.
 
 COMPETITOR ACTIVITY:
-- Amgen: HIGH activity. 2 patents in 10 days + CodeBreaK 101 cohort expansion = structured resistance programme.
-- Revolution Medicines: ACTIVE. EP filing follows RMC-6236 Phase I data. RAS(ON) approach specifically targeting post-covalent-inhibitor resistance setting.
-- Mirati/BMS: WATCH. No new patents. KRYSTAL-12 OS readout expected imminently — if positive, could redefine standard of care and reshape resistance research agenda.
+- Revolution Medicines: HIGH activity. RMC-6291 (elironrasib) advancing in Phase I/II for post-G12Ci failure patients — first RAS(ON) inhibitor with clinical proof-of-concept. Nature Communications paper adds academic validation to a maturing commercial programme.
+- Amgen: ACTIVE. CodeBreaK programme continues with sotorasib combinations. Recent Nature Medicine biomarker analysis (May 2025) identifies TTF-1 low / NRF2 high as predictors of poor sotorasib response — patient selection layer being built around the approved drug.
+- Mirati/BMS: WATCH. KRYSTAL-7 combination data with pembrolizumab is the most significant near-term readout. 63% ORR in PD-L1 high patients is notable — full trial data could reshape first-line treatment sequencing.
 
-FIELD DIRECTION: KRAS G12C research bifurcating — vertical pathway co-inhibition (G12C + SHP2/MEK/SOS1) to suppress adaptive reactivation vs non-covalent RAS(ON) inhibitors for post-resistance setting. Patent activity clusters around combination branch; academic momentum favours next-gen direct inhibition. Gap may represent freedom-to-operate opportunity or signal that next-gen approach is harder to validate clinically.
+FIELD DIRECTION: KRAS G12C research bifurcating — vertical pathway co-inhibition (G12C + SHP2/MEK/SOS1) vs non-covalent RAS(ON) inhibitors for the post-resistance setting. Frontier Medicines' granted dual ON/OFF patent and Revolution Medicines' clinical data are converging signals that next-gen direct inhibition is being validated by multiple independent programmes simultaneously.
 
 Answer questions concisely and analytically. Be specific, cite the relevant papers/patents/signals from this report. Keep responses to 3–5 sentences unless the question requires more depth. You are speaking to a scientist or COO at an early-stage biotech company.`;
 
