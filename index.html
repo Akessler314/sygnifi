@@ -16,7 +16,7 @@
     <img src="logo.png" alt="Sygnifi logo">
     <span class="nav-wordmark">Sygnifi</span>
   </a>
-  <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+  <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
     <span></span><span></span><span></span>
   </button>
   <ul class="nav-links" id="nav-links">
@@ -118,7 +118,7 @@
   <div class="form-inner">
     <h2 class="form-heading fade-up">Request early access</h2>
     <p class="form-sub fade-up" data-delay="1">We're onboarding research teams individually. Tell us what you're working on.</p>
-    <form id="waitlist-form" class="fade-up" data-delay="2" novalidate>
+    <form id="waitlist-form" class="fade-up" data-delay="2" novalidate aria-label="Early access request">
       <div class="field">
         <label for="name">Your name</label>
         <input
@@ -152,7 +152,7 @@
         >
       </div>
       <div class="field">
-        <label for="research">What are you working on? <span style="color:var(--border);font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <label for="research">What are you working on? <span class="field-optional">(optional)</span></label>
         <input
           type="text"
           id="research"
@@ -189,12 +189,16 @@
   const navLinks = document.getElementById('nav-links');
 
   toggle.addEventListener('click', () => {
-    navLinks.classList.toggle('open');
+    const isOpen = navLinks.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', isOpen);
   });
 
   // Close mobile nav when a link is clicked
   navLinks.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => navLinks.classList.remove('open'));
+    a.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
   });
 
   // Smooth scroll for anchor links
