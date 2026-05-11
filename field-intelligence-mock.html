@@ -7,23 +7,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #1e3a5f;          /* Vandar Poel's Blue — replaces near-black */
-    --ink-deep: #152d4a;     /* deeper shade for topbar */
-    --paper: #f5f2e8;        /* Sulphur Yellow cream — unchanged */
-    --paper-dark: #ede8d5;
-    --accent: #c8722b;       /* Yellow Orange — shifted slightly warmer */
-    --accent-light: #f0e4d4;
-    --muted: #6b7f96;        /* blue-tinted muted */
-    --border: #d4cdb8;
-    --green: #2d6a4f;
-    --green-light: #d8f0e6;
-    --amber: #92610a;
-    --amber-light: #fef3dc;
-    --blue: #1e3a5f;
-    --blue-light: #dce8f5;
+    --ink:          oklch(0.29 0.072 253);
+    --ink-deep:     oklch(0.23 0.065 253);
+    --paper:        oklch(0.963 0.012 88);
+    --paper-dark:   oklch(0.936 0.018 84);
+    --accent:       oklch(0.60 0.140 52);
+    --accent-light: oklch(0.916 0.030 72);
+    --muted:        oklch(0.49 0.048 234);
+    --border:       oklch(0.836 0.020 82);
+    --placeholder:  oklch(0.77 0.012 80);
+    --green:        oklch(0.38 0.10 155);
+    --green-light:  oklch(0.93 0.04 150);
+    --amber:        oklch(0.40 0.10 62);
+    --amber-light:  oklch(0.96 0.04 85);
+    --blue:         oklch(0.29 0.072 253);
+    --blue-light:   oklch(0.93 0.025 234);
+    --ease-out:     cubic-bezier(0.25, 0, 0, 1);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { color-scheme: light; }
 
   body {
     background: var(--paper);
@@ -32,6 +36,12 @@
     font-size: 14px;
     line-height: 1.6;
     min-height: 100vh;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 3px;
   }
 
   /* TOP BAR */
@@ -46,7 +56,7 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 2px 12px rgba(21,45,74,0.22);
+    box-shadow: 0 1px 0 oklch(1 0 0 / 0.05), 0 2px 12px oklch(0.23 0.065 253 / 0.22);
   }
 
   .logo {
@@ -57,7 +67,10 @@
     align-items: center;
     gap: 8px;
     color: var(--paper);
+    text-decoration: none;
   }
+
+  .logo img { height: 26px; display: block; }
 
   .logo-dot {
     width: 7px;
@@ -73,12 +86,12 @@
     align-items: center;
     gap: 20px;
     font-size: 13px;
-    color: #a8bcd4;
+    color: oklch(0.76 0.04 234);
   }
 
   .badge-live {
     background: var(--accent);
-    color: white;
+    color: var(--paper);
     font-size: 10px;
     font-weight: 600;
     padding: 2px 8px;
@@ -99,33 +112,31 @@
     border-bottom: 2px solid var(--accent);
   }
 
-  .validation-banner strong {
-    color: #f5c89a;
-  }
+  .validation-banner strong { color: oklch(0.84 0.08 70); }
 
   .validation-banner em {
     font-style: normal;
     background: var(--accent);
-    color: white;
+    color: var(--paper);
     padding: 1px 8px;
     border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
     margin-left: 6px;
     cursor: pointer;
-    transition: opacity 0.15s, background 0.15s;
+    transition: opacity 0.15s var(--ease-out), background 0.15s var(--ease-out);
   }
 
   .validation-banner em:hover { opacity: 0.85; }
 
   .validation-banner em:first-of-type {
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.35);
-    color: #d8e8f5;
+    border: 1px solid oklch(1 0 0 / 0.35);
+    color: oklch(0.91 0.03 234);
   }
 
   .validation-banner em:first-of-type:hover {
-    background: rgba(255,255,255,0.1);
+    background: oklch(1 0 0 / 0.10);
     opacity: 1;
   }
 
@@ -137,7 +148,7 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 24px;
-    animation: fadeUp 0.5s ease both;
+    animation: fadeUp 0.5s var(--ease-out) both;
   }
 
   .report-meta {
@@ -158,10 +169,7 @@
     color: var(--ink-deep);
   }
 
-  .report-title em {
-    color: var(--accent);
-    font-style: italic;
-  }
+  .report-title em { color: var(--accent); font-style: italic; }
 
   .report-actions {
     display: flex;
@@ -179,24 +187,15 @@
     cursor: pointer;
     border: none;
     font-family: 'DM Sans', sans-serif;
-    transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s, background 0.15s;
+    transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out), background 0.15s var(--ease-out);
   }
 
   .btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
-  .btn-primary {
-    background: var(--ink);
-    color: var(--paper);
-  }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:hover { box-shadow: 0 4px 14px oklch(0.23 0.065 253 / 0.28); }
 
-  .btn-primary:hover { box-shadow: 0 4px 14px rgba(21,45,74,0.28); }
-
-  .btn-secondary {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--ink);
-  }
-
+  .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--ink); }
   .btn-secondary:hover { background: var(--paper-dark); }
 
   .coverage-tags {
@@ -223,27 +222,23 @@
     padding: 18px 32px;
     display: flex;
     gap: 40px;
-    animation: fadeUp 0.5s 0.1s ease both;
+    animation: fadeUp 0.5s 0.1s var(--ease-out) both;
   }
 
-  .summary-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
+  .summary-item { display: flex; flex-direction: column; gap: 2px; }
 
   .summary-num {
     font-family: 'Instrument Serif', serif;
     font-size: 28px;
     line-height: 1;
-    color: white;
+    color: var(--paper);
   }
 
   .summary-num span { color: var(--accent); }
 
   .summary-label {
     font-size: 11px;
-    color: #8aadcc;
+    color: oklch(0.71 0.05 234);
     font-family: 'DM Mono', monospace;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -251,22 +246,21 @@
 
   .summary-divider {
     width: 1px;
-    background: #2a4f75;
+    background: oklch(0.37 0.07 253);
     margin: 4px 0;
   }
 
-  /* SIGNAL BANNER */
+  /* SIGNAL BANNER — full border, no side stripe */
   .signal-banner {
     margin: 24px 32px 0;
     background: var(--accent-light);
-    border: 1px solid #e8c4a8;
-    border-left: 4px solid var(--accent);
+    border: 1px solid oklch(0.83 0.05 65);
     border-radius: 8px;
     padding: 16px 20px;
     display: flex;
     gap: 14px;
     align-items: flex-start;
-    animation: fadeUp 0.5s 0.15s ease both;
+    animation: fadeUp 0.5s 0.15s var(--ease-out) both;
   }
 
   .signal-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
@@ -279,13 +273,13 @@
     margin-bottom: 3px;
   }
 
-  .signal-text p { font-size: 13px; color: #5a3020; line-height: 1.5; }
+  .signal-text p { font-size: 13px; color: oklch(0.33 0.08 42); line-height: 1.5; }
 
   /* DEMO NOTICE */
   .demo-notice {
     margin: 12px 32px 0;
     background: var(--blue-light);
-    border: 1px solid #b8cfe8;
+    border: 1px solid oklch(0.84 0.03 234);
     border-radius: 6px;
     padding: 9px 14px;
     font-size: 12px;
@@ -317,11 +311,7 @@
     gap: 0;
   }
 
-  .main-col {
-    padding: 28px 32px;
-    border-right: 1px solid var(--border);
-  }
-
+  .main-col { padding: 28px 32px; border-right: 1px solid var(--border); }
   .side-col { padding: 28px 24px; }
 
   /* SECTION HEADERS */
@@ -351,7 +341,7 @@
     background: var(--accent);
   }
 
-  .see-all { font-size: 12px; color: var(--muted); cursor: pointer; transition: color 0.15s; }
+  .see-all { font-size: 12px; color: var(--muted); cursor: pointer; transition: color 0.15s var(--ease-out); }
   .see-all:hover { color: var(--accent); }
 
   /* PAPER CARDS */
@@ -360,15 +350,15 @@
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 12px;
-    background: white;
-    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
-    animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    background: oklch(1 0 0);
+    transition: box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+    animation: fadeUp 0.5s var(--ease-out) both;
   }
 
   .paper-card:hover {
-    box-shadow: 0 2px 4px rgba(30,58,95,0.04), 0 8px 24px rgba(30,58,95,0.1);
+    box-shadow: 0 2px 4px oklch(0.29 0.072 253 / 0.04), 0 8px 24px oklch(0.29 0.072 253 / 0.10);
     transform: translateY(-2px);
-    border-color: #c0b8a0;
+    border-color: oklch(0.76 0.018 80);
   }
 
   .paper-card:nth-child(1) { animation-delay: 0.15s; }
@@ -385,7 +375,7 @@
 
   .paper-title { font-size: 14px; font-weight: 600; line-height: 1.4; flex: 1; color: var(--ink-deep); }
 
-  .paper-title a { color: inherit; text-decoration: none; transition: color 0.15s; }
+  .paper-title a { color: inherit; text-decoration: none; transition: color 0.15s var(--ease-out); }
   .paper-title a:hover { color: var(--accent); }
   .paper-title a::after {
     content: ' ↗';
@@ -393,7 +383,7 @@
     font-weight: 500;
     color: var(--border);
     vertical-align: super;
-    transition: color 0.15s;
+    transition: color 0.15s var(--ease-out);
   }
   .paper-title a:hover::after { color: var(--accent); }
 
@@ -405,11 +395,11 @@
     flex-shrink: 0;
   }
 
-  .rel-high { background: var(--green-light); color: var(--green); }
-  .rel-med { background: var(--amber-light); color: var(--amber); }
-  .rel-watch { background: var(--blue-light); color: var(--blue); }
+  .rel-high  { background: var(--green-light); color: var(--green); }
+  .rel-med   { background: var(--amber-light); color: var(--amber); }
+  .rel-watch { background: var(--blue-light);  color: var(--blue);  }
 
-  .paper-summary { font-size: 13px; color: #444; line-height: 1.55; margin-bottom: 10px; }
+  .paper-summary { font-size: 13px; color: oklch(0.38 0.005 250); line-height: 1.55; margin-bottom: 10px; }
 
   .paper-footer {
     display: flex;
@@ -423,19 +413,19 @@
     margin-top: 10px;
   }
 
+  /* WHY MATTERS — background tint only, no side stripe */
   .why-matters {
     background: var(--paper-dark);
     border-radius: 5px;
     padding: 8px 12px;
     font-size: 12px;
-    color: #555;
+    color: oklch(0.38 0.005 250);
     margin-top: 8px;
     margin-bottom: 10px;
-    border-left: 3px solid var(--accent);
-    transition: background 0.2s;
+    transition: background 0.2s var(--ease-out);
   }
 
-  .paper-card:hover .why-matters { background: #e8e2cc; }
+  .paper-card:hover .why-matters { background: oklch(0.91 0.018 84); }
 
   .why-matters strong {
     color: var(--accent);
@@ -453,15 +443,15 @@
     border-radius: 8px;
     padding: 14px 16px;
     margin-bottom: 10px;
-    background: white;
-    animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+    background: oklch(1 0 0);
+    animation: fadeUp 0.5s var(--ease-out) both;
+    transition: box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
   }
 
   .patent-card:hover {
-    box-shadow: 0 2px 4px rgba(30,58,95,0.04), 0 6px 18px rgba(30,58,95,0.09);
+    box-shadow: 0 2px 4px oklch(0.29 0.072 253 / 0.04), 0 6px 18px oklch(0.29 0.072 253 / 0.09);
     transform: translateY(-2px);
-    border-color: #c0b8a0;
+    border-color: oklch(0.76 0.018 80);
   }
 
   .patent-card:nth-child(1) { animation-delay: 0.25s; }
@@ -475,30 +465,30 @@
     margin-bottom: 6px;
   }
 
-  .patent-id { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+  .patent-id     { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
   .patent-status { font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 7px; border-radius: 4px; }
-  .status-filed { background: var(--amber-light); color: var(--amber); }
+  .status-filed   { background: var(--amber-light); color: var(--amber); }
   .status-granted { background: var(--green-light); color: var(--green); }
 
-  .patent-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; color: var(--ink-deep); }
+  .patent-title    { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; color: var(--ink-deep); }
   .patent-assignee { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-  .patent-summary { font-size: 12px; color: #444; line-height: 1.5; }
+  .patent-summary  { font-size: 12px; color: oklch(0.38 0.005 250); line-height: 1.5; }
 
   .conflict-flag {
     margin-top: 8px;
-    background: #fff0ed;
-    border: 1px solid #f0c4b8;
+    background: oklch(0.97 0.015 25);
+    border: 1px solid oklch(0.84 0.06 25);
     border-radius: 5px;
     padding: 7px 10px;
     font-size: 12px;
-    color: #7a2a10;
+    color: oklch(0.35 0.10 30);
     display: flex;
     gap: 6px;
     align-items: flex-start;
   }
 
   /* SIDEBAR */
-  .side-section { margin-bottom: 28px; animation: fadeUp 0.4s 0.3s ease both; }
+  .side-section { margin-bottom: 28px; animation: fadeUp 0.4s 0.3s var(--ease-out) both; }
 
   /* FIELD PULSE */
   .field-pulse {
@@ -507,12 +497,12 @@
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 28px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.15);
-    transition: box-shadow 0.25s ease;
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.07), inset 0 -1px 0 oklch(0 0 0 / 0.15);
+    transition: box-shadow 0.25s var(--ease-out);
   }
 
   .field-pulse:hover {
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.15), 0 4px 16px rgba(21,45,74,0.2);
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.10), inset 0 -1px 0 oklch(0 0 0 / 0.15), 0 4px 16px oklch(0.23 0.065 253 / 0.20);
   }
 
   .pulse-title {
@@ -522,33 +512,26 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: white;
+    color: var(--paper);
   }
 
-  .pulse-body { font-size: 12px; color: #a8bcd4; line-height: 1.6; }
-  .pulse-body strong { color: white; }
+  .pulse-body { font-size: 12px; color: oklch(0.76 0.04 234); line-height: 1.6; }
+  .pulse-body strong { color: var(--paper); }
 
-  /* COMPETITOR */
+  /* COMPETITOR — name color change on hover instead of side stripe */
   .competitor-item {
-    padding: 12px 0 12px 0;
+    padding: 12px 0;
     border-bottom: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     gap: 4px;
-    border-left: 2px solid transparent;
-    padding-left: 0;
-    transition: border-color 0.2s ease, padding-left 0.2s ease;
-  }
-
-  .competitor-item:hover {
-    border-left-color: var(--accent);
-    padding-left: 10px;
   }
 
   .competitor-item:last-child { border-bottom: none; }
+  .competitor-item:hover .comp-name { color: var(--accent); }
 
   .comp-header { display: flex; justify-content: space-between; align-items: center; }
-  .comp-name { font-weight: 600; font-size: 13px; color: var(--ink-deep); }
+  .comp-name   { font-weight: 600; font-size: 13px; color: var(--ink-deep); transition: color 0.15s var(--ease-out); }
 
   .comp-activity {
     font-size: 10px;
@@ -557,10 +540,10 @@
     border-radius: 3px;
   }
 
-  .activity-high { background: #fdecea; color: #c0392b; }
-  .activity-med { background: var(--amber-light); color: var(--amber); }
-  .activity-low { background: var(--paper-dark); color: var(--muted); }
-  .comp-detail { font-size: 12px; color: #555; line-height: 1.4; }
+  .activity-high { background: oklch(0.97 0.015 25); color: oklch(0.45 0.14 25); }
+  .activity-med  { background: var(--amber-light); color: var(--amber); }
+  .activity-low  { background: var(--paper-dark);  color: var(--muted); }
+  .comp-detail   { font-size: 12px; color: oklch(0.42 0.005 250); line-height: 1.4; }
 
   /* TRIALS */
   .trial-item {
@@ -568,14 +551,14 @@
     border: 1px solid var(--border);
     border-radius: 7px;
     margin-bottom: 8px;
-    background: white;
-    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+    background: oklch(1 0 0);
+    transition: box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
   }
 
   .trial-item:hover {
-    box-shadow: 0 2px 4px rgba(30,58,95,0.04), 0 6px 16px rgba(30,58,95,0.08);
+    box-shadow: 0 2px 4px oklch(0.29 0.072 253 / 0.04), 0 6px 16px oklch(0.29 0.072 253 / 0.08);
     transform: translateY(-2px);
-    border-color: #c0b8a0;
+    border-color: oklch(0.76 0.018 80);
   }
 
   .trial-phase {
@@ -589,8 +572,9 @@
     margin-bottom: 5px;
   }
 
-  .trial-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; line-height: 1.4; color: var(--ink-deep); }
-  .trial-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .trial-title  { font-size: 12px; font-weight: 600; margin-bottom: 4px; line-height: 1.4; color: var(--ink-deep); }
+  .trial-meta   { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .trial-detail { margin-top: 6px; font-size: 12px; color: oklch(0.42 0.005 250); }
 
   /* ASK BOX */
   .ask-box {
@@ -611,7 +595,7 @@
 
   .ask-input {
     width: 100%;
-    background: white;
+    background: oklch(1 0 0);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 8px 12px;
@@ -621,16 +605,19 @@
     outline: none;
     resize: none;
     height: 64px;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
   }
 
-  .ask-input:focus { border-color: var(--accent); }
+  .ask-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(0.60 0.140 52 / 0.12);
+  }
 
   .ask-btn {
     margin-top: 8px;
     width: 100%;
     background: var(--accent);
-    color: white;
+    color: var(--paper);
     border: none;
     border-radius: 6px;
     padding: 9px;
@@ -638,10 +625,10 @@
     font-weight: 500;
     font-family: 'DM Sans', sans-serif;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s var(--ease-out);
   }
 
-  .ask-btn:hover { opacity: 0.88; }
+  .ask-btn:hover:not(:disabled) { opacity: 0.88; }
   .ask-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .ask-suggestions {
@@ -654,12 +641,12 @@
   .suggestion-chip {
     font-size: 11px;
     color: var(--muted);
-    background: white;
+    background: oklch(1 0 0);
     border: 1px solid var(--border);
     border-radius: 5px;
     padding: 5px 10px;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.15s var(--ease-out), color 0.15s var(--ease-out), background 0.15s var(--ease-out);
     line-height: 1.3;
     text-align: left;
   }
@@ -669,15 +656,15 @@
   /* ASK RESPONSE */
   .ask-response {
     margin-top: 10px;
-    background: white;
+    background: oklch(1 0 0);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 10px 12px;
     font-size: 12px;
-    color: #333;
+    color: oklch(0.28 0.005 250);
     line-height: 1.6;
     display: none;
-    animation: fadeUp 0.3s ease both;
+    animation: fadeUp 0.3s var(--ease-out) both;
   }
 
   .ask-response.visible { display: block; }
@@ -708,7 +695,7 @@
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(21, 45, 74, 0.6);
+    background: oklch(0.23 0.065 253 / 0.60);
     backdrop-filter: blur(3px);
     z-index: 200;
     display: flex;
@@ -716,13 +703,10 @@
     justify-content: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s var(--ease-out);
   }
 
-  .modal-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
 
   .modal {
     background: var(--paper);
@@ -730,17 +714,14 @@
     padding: 28px;
     max-width: 440px;
     width: 90%;
-    box-shadow: 0 20px 60px rgba(21,45,74,0.25);
+    box-shadow: 0 20px 60px oklch(0.23 0.065 253 / 0.25);
     transform: translateY(20px) scale(0.98);
-    transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.2s ease;
+    transition: transform 0.3s var(--ease-out), opacity 0.2s var(--ease-out);
   }
 
   .modal-overlay.open .modal { transform: translateY(0) scale(1); }
 
-  .modal-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-  }
+  .modal-icon  { font-size: 28px; margin-bottom: 12px; }
 
   .modal-title {
     font-family: 'Instrument Serif', serif;
@@ -752,21 +733,22 @@
 
   .modal-body {
     font-size: 13px;
-    color: #555;
+    color: oklch(0.42 0.005 250);
     line-height: 1.6;
     margin-bottom: 20px;
   }
 
   .modal-body strong { color: var(--ink-deep); }
 
+  /* MODAL EXAMPLE — full border, no side stripe */
   .modal-example {
     background: var(--paper-dark);
-    border-left: 3px solid var(--accent);
+    border: 1px solid var(--border);
     border-radius: 4px;
     padding: 10px 14px;
     font-size: 12px;
     font-family: 'DM Mono', monospace;
-    color: #555;
+    color: oklch(0.42 0.005 250);
     margin: 12px 0;
     line-height: 1.5;
   }
@@ -782,21 +764,32 @@
     font-family: 'DM Sans', sans-serif;
     cursor: pointer;
     width: 100%;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s var(--ease-out);
   }
 
   .modal-close:hover { opacity: 0.85; }
 
+  .modal-close-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--ink);
+    margin-top: 8px;
+  }
+
+  .modal-close-secondary:hover { opacity: 1; background: var(--paper-dark); }
+
+  .signup-success .modal-close { margin-top: 18px; }
+
   /* FOOTER */
   .report-footer {
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid oklch(1 0 0 / 0.06);
     background: var(--ink-deep);
     padding: 16px 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 12px;
-    color: rgba(245,242,232,0.45);
+    color: oklch(0.69 0.01 88);
     font-family: 'DM Mono', monospace;
   }
 
@@ -804,14 +797,17 @@
     font-family: 'Instrument Serif', serif;
     font-size: 14px;
     color: var(--paper);
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
+
+  .footer-brand img { height: 20px; display: block; opacity: 0.7; }
 
   .section-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
 
-  /* SIGNUP FORM */
-  .signup-field {
-    margin-bottom: 12px;
-  }
+  /* SIGNUP FORM (in modal) */
+  .signup-field { margin-bottom: 12px; }
 
   .signup-label {
     display: block;
@@ -823,9 +819,16 @@
     margin-bottom: 5px;
   }
 
+  .field-optional {
+    color: var(--border);
+    font-family: 'DM Sans', sans-serif;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
   .signup-input {
     width: 100%;
-    background: white;
+    background: oklch(1 0 0);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 9px 12px;
@@ -833,15 +836,18 @@
     font-family: 'DM Sans', sans-serif;
     color: var(--ink);
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
   }
 
-  .signup-input:focus { border-color: var(--accent); }
+  .signup-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(0.60 0.140 52 / 0.12);
+  }
 
   .signup-submit {
     width: 100%;
     background: var(--accent);
-    color: white;
+    color: var(--paper);
     border: none;
     border-radius: 6px;
     padding: 10px;
@@ -850,17 +856,13 @@
     font-family: 'DM Sans', sans-serif;
     cursor: pointer;
     margin-top: 4px;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s var(--ease-out);
   }
 
-  .signup-submit:hover { opacity: 0.88; }
+  .signup-submit:hover:not(:disabled) { opacity: 0.88; }
   .signup-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
-  .signup-success {
-    text-align: center;
-    padding: 12px 0 4px;
-  }
-
+  .signup-success { text-align: center; padding: 12px 0 4px; }
   .signup-success-icon { font-size: 32px; margin-bottom: 10px; }
 
   .signup-success h3 {
@@ -870,27 +872,23 @@
     margin-bottom: 6px;
   }
 
-  .signup-success p {
-    font-size: 13px;
-    color: #555;
-    line-height: 1.5;
-  }
+  .signup-success p { font-size: 13px; color: oklch(0.42 0.005 250); line-height: 1.5; }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
   @keyframes badge-pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+    50%       { opacity: 0.7; }
   }
 
   @keyframes dot-glow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(200,114,43,0); }
-    50% { box-shadow: 0 0 0 3px rgba(200,114,43,0.28); }
+    0%, 100% { box-shadow: 0 0 0 0 oklch(0.60 0.140 52 / 0); }
+    50%       { box-shadow: 0 0 0 3px oklch(0.60 0.140 52 / 0.28); }
   }
 
   ::-webkit-scrollbar { width: 6px; }
@@ -899,7 +897,6 @@
 
   @media (max-width: 768px) {
     .topbar { padding: 0 16px; }
-
     .validation-banner { padding: 10px 16px; }
 
     .validation-banner em {
@@ -931,19 +928,14 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
-      overflow-x: visible;
     }
 
     .summary-divider { display: none; }
-
     .summary-num { font-size: 22px; }
-
     .signal-banner { margin: 16px 16px 0; }
-    .demo-notice { margin: 10px 16px 0; }
+    .demo-notice   { margin: 10px 16px 0; }
 
-    .main-grid {
-      display: block;
-    }
+    .main-grid { display: block; }
 
     .main-col {
       padding: 20px 16px;
@@ -952,7 +944,6 @@
     }
 
     .side-col { padding: 20px 16px; }
-
     .field-pulse { margin-bottom: 20px; }
 
     .report-footer {
@@ -960,6 +951,15 @@
       gap: 8px;
       padding: 14px 16px;
       text-align: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
     }
   }
 </style>
@@ -1001,7 +1001,7 @@
           <input class="signup-input" id="signup-org" name="organisation" type="text" placeholder="Research institute or company" />
         </div>
         <div class="signup-field">
-          <label class="signup-label" for="signup-research">What are you working on? <span style="color:var(--border)">(optional)</span></label>
+          <label class="signup-label" for="signup-research">What are you working on? <span class="field-optional">(optional)</span></label>
           <input class="signup-input" id="signup-research" name="research_area" type="text" placeholder="e.g. KRAS G12C inhibitor resistance in NSCLC" />
         </div>
         <button class="signup-submit" type="submit" id="signup-btn">Request access →</button>
@@ -1011,7 +1011,7 @@
       <div class="signup-success-icon">✓</div>
       <h3>You're on the list</h3>
       <p>We'll be in touch soon. In the meantime, feel free to explore the report and try the Ask Sygnifi box below.</p>
-      <button class="modal-close" style="margin-top:18px" onclick="closeModal('modal-signup')">Back to report →</button>
+      <button class="modal-close" onclick="closeModal('modal-signup')">Back to report →</button>
     </div>
   </div>
 </div>
@@ -1028,7 +1028,6 @@
   </div>
 </div>
 
-<!-- WHAT IS SYGNIFI MODAL -->
 <div class="modal-overlay" id="modal-what">
   <div class="modal">
     <div class="modal-icon">🧭</div>
@@ -1039,14 +1038,14 @@
       <p>This is an early demo. If something you'd want isn't here yet, we'd love to hear about it. We're building in the open and want the people using it to shape what gets built first.</p>
     </div>
     <button class="modal-close" onclick="closeModal('modal-what'); openModal('modal-signup')">Request early access →</button>
-    <button class="modal-close" style="margin-top:8px; background: transparent; border: 1px solid var(--border); color: var(--ink);" onclick="closeModal('modal-what')">Back to report</button>
+    <button class="modal-close modal-close-secondary" onclick="closeModal('modal-what')">Back to report</button>
   </div>
 </div>
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <a href="index.html" class="logo" style="text-decoration:none;">
-    <img src="logo.png" alt="Sygnifi" style="height:26px;display:block;">
+  <a href="index.html" class="logo">
+    <img src="logo.png" alt="Sygnifi">
     Sygnifi
   </a>
   <div class="topbar-right">
@@ -1273,7 +1272,7 @@
         <span class="trial-phase">Phase II</span>
         <div class="trial-title">KRYSTAL-7: Adagrasib + pembrolizumab in treatment-naïve KRAS G12C NSCLC</div>
         <div class="trial-meta">NCT04613596 · Mirati/BMS · Active</div>
-        <div style="margin-top: 6px; font-size: 12px; color: #555;">Among 148 patients enrolled, confirmed ORR of 63% in PD-L1 TPS ≥50% subgroup. Two grade 5 TRAEs reported. Full dataset readout pending — combination immunotherapy is the most watched near-term signal in this space.</div>
+        <div class="trial-detail">Among 148 patients enrolled, confirmed ORR of 63% in PD-L1 TPS ≥50% subgroup. Two grade 5 TRAEs reported. Full dataset readout pending — combination immunotherapy is the most watched near-term signal in this space.</div>
       </div>
     </div>
 
@@ -1299,8 +1298,8 @@
 <!-- FOOTER -->
 <div class="report-footer">
   <div>Sources: PubMed E-utilities · EPO OPS · USPTO · ClinicalTrials.gov v2 · Generated Apr 20, 2025</div>
-  <div class="footer-brand" style="display:flex;align-items:center;gap:8px;">
-    <img src="logo.png" alt="Sygnifi" style="height:20px;display:block;opacity:0.7;">
+  <div class="footer-brand">
+    <img src="logo.png" alt="Sygnifi">
     Sygnifi
   </div>
 </div>
@@ -1393,7 +1392,6 @@ FIELD DIRECTION: KRAS G12C research bifurcating — vertical pathway co-inhibiti
 Answer questions concisely and analytically. Be specific, cite the relevant papers/patents/signals from this report. Keep responses to 3–5 sentences unless the question requires more depth. You are speaking to a scientist or COO at an early-stage biotech company.`;
 
   // ── Claude API call (via proxy) ────────────────────────────────
-  // PROXY_URL will be replaced with your Cloudflare Worker URL after deployment
   const PROXY_URL = 'https://sygnifi-proxy.andrewmcc.workers.dev';
 
   async function submitQuestion() {
@@ -1429,7 +1427,7 @@ Answer questions concisely and analytically. Be specific, cite the relevant pape
       responseText.textContent = answer;
 
     } catch (err) {
-      responseText.innerHTML = '<em style="color:#c0392b">Something went wrong. Please try again.</em>';
+      responseText.innerHTML = '<em style="color:oklch(0.45 0.14 25)">Something went wrong. Please try again.</em>';
       console.error(err);
     } finally {
       btn.disabled = false;
