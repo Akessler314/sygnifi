@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sygnifi — You're on the list</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .confirm-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .confirm-nav {
+      background: var(--ink);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 36px;
+      flex-shrink: 0;
+    }
+
+    .confirm-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .confirm-nav img {
+      height: 30px;
+      display: block;
+    }
+
+    .confirm-nav-wordmark {
+      font-family: 'Instrument Serif', serif;
+      font-size: 20px;
+      color: var(--paper);
+      letter-spacing: -0.3px;
+    }
+
+    .confirm-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 36px;
+      background: var(--paper);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* grain texture matching hero */
+    .confirm-body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+    }
+
+    .confirm-inner {
+      max-width: 540px;
+      width: 100%;
+      position: relative;
+    }
+
+    .confirm-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: 1px solid #e8c4a8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+      color: var(--accent);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .confirm-heading {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(40px, 7vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+      color: var(--ink);
+      margin-bottom: 22px;
+    }
+
+    .confirm-text {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 40px;
+      font-weight: 300;
+      max-width: 460px;
+    }
+
+    .confirm-report-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent-light);
+      padding-bottom: 3px;
+      transition: border-color 0.15s, opacity 0.15s;
+    }
+
+    .confirm-report-link:hover {
+      opacity: 0.75;
+      border-color: var(--accent);
+    }
+
+    .confirm-divider {
+      width: 48px;
+      height: 2px;
+      background: var(--border);
+      margin: 48px 0 0;
+    }
+
+    @media (max-width: 600px) {
+      .confirm-nav { padding: 0 20px; }
+      .confirm-body { padding: 60px 20px; align-items: flex-start; padding-top: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="confirm-page">
+
+  <nav class="confirm-nav">
+    <a href="index.html">
+      <img src="logo.png" alt="Sygnifi logo">
+      <span class="confirm-nav-wordmark">Sygnifi</span>
+    </a>
+  </nav>
+
+  <div class="confirm-body">
+    <div class="confirm-inner">
+      <div class="confirm-mark">✓</div>
+      <h1 class="confirm-heading">You're on the list.</h1>
+      <p class="confirm-text">
+        We're onboarding teams individually and will be in touch shortly. In the meantime, take a look at a sample report to see what your weekly brief will look like.
+      </p>
+      <a href="field-intelligence-mock.html" target="_blank" rel="noopener" class="confirm-report-link">
+        View sample report →
+      </a>
+      <div class="confirm-divider"></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
