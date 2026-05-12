@@ -739,15 +739,15 @@
   <!-- STEP 5 — Key terms -->
   <section class="step" id="step-5" data-step="5" hidden>
     <div class="step-num">05 · Vocabulary</div>
-    <h1 class="step-heading">Any specific terms we should track?</h1>
-    <p class="step-sub">Genes, proteins, mechanisms, compounds, trial identifiers — anything specific to your work.</p>
+    <h1 class="step-heading">Anything specific to add?</h1>
+    <p class="step-sub">We'll pull identifiers like <em>KRAS</em>, <em>G12C</em>, or <em>sotorasib</em> from your description in step 1 automatically. Add anything else we should search for — or leave blank if step 1 covers it.</p>
     <textarea
       id="input-terms"
       class="textarea"
       rows="3"
-      placeholder="e.g. KRAS G12C, sotorasib, adagrasib, NSCLC, RAS inhibitor resistance..."
+      placeholder="e.g. RMC-6291, MRTX849, SHP2, MEK inhibitor combinations..."
     ></textarea>
-    <div class="helper">Comma-separated. We'll use these to query PubMed directly.</div>
+    <div class="helper" id="helper-terms">Comma-separated works best — but we'll also pick up identifiers from spaces.</div>
     <div class="nav-row">
       <button class="btn-back" type="button" data-back>← Back</button>
       <div class="nav-right">
@@ -829,6 +829,47 @@
 
   function saveContext() {
     sessionStorage.setItem('sygnifi_context', JSON.stringify(context));
+  }
+
+  // ── Search-term extraction ────────────────────────────────────
+  // Pulls identifier-shaped tokens (ALL-CAPS, drug-name suffixes)
+  // from both step 1 (research focus) and step 5 (key terms), so the
+  // user can give us a description in plain English in step 1 and we
+  // still build a useful PubMed query.
+  const CAPS_PATTERN = /\b[A-Z][A-Z0-9-]{1,}\b/g;
+  const DRUG_SUFFIX  = /\b[a-z]{3,}(?:rasib|tinib|nib|mab|cept|stat|prazole|olol|sartan|pril)\b/gi;
+  const STOP = new Set(['AI', 'CEO', 'CFO', 'CTO', 'COO', 'CMO', 'TBD', 'FYI', 'AKA', 'ASAP', 'TLDR', 'I', 'OK']);
+
+  function extractSearchTerms(focus, terms) {
+    const out = [];
+    const seen = new Set();
+    function add(raw) {
+      const v = String(raw || '').trim();
+      if (v.length < 2) return;
+      if (STOP.has(v.toUpperCase())) return;
+      const key = v.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push(v);
+    }
+
+    // Step 5 explicit terms — split on common separators.
+    (terms || '').split(/[,;\n]+/).forEach(t => add(t));
+
+    // Step 5 — also pull identifier patterns out of whatever was typed,
+    // so "KRAS G12C sotorasib" (space-separated) still works.
+    ((terms || '').match(CAPS_PATTERN) || []).forEach(add);
+    ((terms || '').match(DRUG_SUFFIX) || []).forEach(add);
+
+    // Step 1 — extract identifiers from the prose description.
+    ((focus || '').match(CAPS_PATTERN) || []).forEach(add);
+    ((focus || '').match(DRUG_SUFFIX) || []).forEach(add);
+
+    return out.slice(0, 10);
+  }
+
+  function formatPubMedDate(d) {
+    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
   }
 
   // ── Navigation ────────────────────────────────────────────────
@@ -971,14 +1012,26 @@
     showStep(5);
   });
 
-  // ── Step 5 — terms ────────────────────────────────────────────
+  // ── Step 5 — terms (now optional if step 1 yields identifiers) ─
   const inputTerms = document.getElementById('input-terms');
+  const helperTerms = document.getElementById('helper-terms');
   const next5 = document.getElementById('next-5');
   inputTerms.value = context.terms || '';
 
   function validateStep5() {
-    const ok = inputTerms.value.trim().length >= 5;
+    const extracted = extractSearchTerms(context.focus, inputTerms.value);
+    const ok = extracted.length > 0;
     next5.disabled = !ok;
+
+    if (extracted.length === 0) {
+      helperTerms.textContent = "Add at least one specific term — we couldn't find any identifiers in your step 1 description either.";
+      helperTerms.classList.add('warn');
+    } else {
+      const preview = extracted.slice(0, 6).join(', ');
+      const more = extracted.length > 6 ? ` + ${extracted.length - 6} more` : '';
+      helperTerms.textContent = `Searching PubMed for: ${preview}${more}`;
+      helperTerms.classList.remove('warn');
+    }
     return ok;
   }
   inputTerms.addEventListener('input', validateStep5);
@@ -1028,32 +1081,33 @@
   });
 
   // ── PubMed fetch ──────────────────────────────────────────────
-  // mode='recent'      — sort by date, top 10
-  // mode='foundational' — sort by relevance, past 5 years, top 5
-  async function fetchPubMedPapers(terms, mode = 'recent') {
-    const cleanTerms = terms
-      .split(/[,\n]/)
-      .map(t => t.trim())
-      .filter(Boolean);
-    if (cleanTerms.length === 0) return [];
+  // mode='recent'       — top 10 most relevant from the last 90 days
+  // mode='foundational' — top 5 most relevant from the last 5 years
+  async function fetchPubMedPapers(termList, mode = 'recent') {
+    if (!termList || termList.length === 0) return [];
 
-    const query = cleanTerms.map(t => `"${t}"`).join(' OR ');
+    const query = termList.map(t => `"${t}"`).join(' OR ');
 
     // 1) esearch
     const searchUrl = new URL('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi');
     searchUrl.searchParams.set('db', 'pubmed');
     searchUrl.searchParams.set('term', query);
     searchUrl.searchParams.set('retmode', 'json');
+    searchUrl.searchParams.set('sort', 'relevance');
+    searchUrl.searchParams.set('datetype', 'pdat');
+
     if (mode === 'foundational') {
       searchUrl.searchParams.set('retmax', '5');
-      searchUrl.searchParams.set('sort', 'relevance');
       const year = new Date().getFullYear();
       searchUrl.searchParams.set('mindate', String(year - 5));
       searchUrl.searchParams.set('maxdate', String(year));
-      searchUrl.searchParams.set('datetype', 'pdat');
     } else {
       searchUrl.searchParams.set('retmax', '10');
-      searchUrl.searchParams.set('sort', 'date');
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 90);
+      searchUrl.searchParams.set('mindate', formatPubMedDate(start));
+      searchUrl.searchParams.set('maxdate', formatPubMedDate(end));
     }
 
     let pmids = [];
@@ -1321,9 +1375,10 @@ Return only valid JSON, no markdown, no preamble.`;
     document.getElementById('loading-error').classList.remove('visible');
     startMessageCycle();
     try {
+      const searchTerms = extractSearchTerms(context.focus, context.terms);
       const [recent, foundational] = await Promise.all([
-        fetchPubMedPapers(context.terms, 'recent'),
-        fetchPubMedPapers(context.terms, 'foundational')
+        fetchPubMedPapers(searchTerms, 'recent'),
+        fetchPubMedPapers(searchTerms, 'foundational')
       ]);
       // No dedupe: if a paper is both this week's news AND foundational,
       // surfacing it in both sections is the right signal, not a bug.
