@@ -30,6 +30,10 @@ Clear, rigorous, human. Scientific credibility without academic stuffiness. Feel
 4. **Restraint signals expertise.** The best practitioners trust the spare, not the decorated. Visual complexity is not a proxy for capability.
 5. **Science-adjacent, not science-cosplay.** The design can draw from editorial and journal references without becoming a PDF.
 
+## Copy
+
+American English throughout. Spellings to watch: synthesized, organized, prioritized, contextualized, program (not programme), remodeling, analyzing.
+
 ## Accessibility & Inclusion
 
 WCAG AA minimum. Color contrast must pass for body and UI text. Reduced motion should be respected (prefers-reduced-motion). No dependence on color alone for meaning.
