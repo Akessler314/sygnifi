@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sygnifi — Early access</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:          oklch(0.29 0.072 253);
+    --ink-deep:     oklch(0.23 0.065 253);
+    --paper:        oklch(0.963 0.012 88);
+    --paper-dark:   oklch(0.936 0.018 84);
+    --accent:       oklch(0.60 0.140 52);
+    --accent-light: oklch(0.916 0.030 72);
+    --muted:        oklch(0.49 0.048 234);
+    --border:       oklch(0.836 0.020 82);
+    --placeholder:  oklch(0.77 0.012 80);
+    --error:        oklch(0.55 0.15 25);
+    --ease-out:     cubic-bezier(0.25, 0, 0, 1);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { color-scheme: light; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* grain texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 44px 40px 32px;
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    box-shadow:
+      0 1px 0 oklch(1 0 0 / 0.4) inset,
+      0 2px 4px oklch(0.29 0.072 253 / 0.04),
+      0 14px 36px oklch(0.29 0.072 253 / 0.10),
+      0 40px 80px oklch(0.29 0.072 253 / 0.06);
+    animation: fadeUp 0.55s var(--ease-out) both;
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    justify-content: center;
+  }
+
+  .logo-wrap img {
+    height: 30px;
+    display: block;
+  }
+
+  .wordmark {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    letter-spacing: -0.3px;
+    color: var(--ink-deep);
+  }
+
+  .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .kicker::before,
+  .kicker::after {
+    content: '';
+    display: block;
+    width: 22px;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .heading {
+    font-family: 'Instrument Serif', serif;
+    font-size: 34px;
+    line-height: 1.08;
+    letter-spacing: -0.6px;
+    color: var(--ink-deep);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 28px;
+    font-weight: 300;
+    line-height: 1.55;
+  }
+
+  form { display: flex; flex-direction: column; }
+
+  .input-field {
+    width: 100%;
+    background: oklch(1 0 0);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 13px 16px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    outline: none;
+    letter-spacing: 0.5px;
+    transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+    -webkit-appearance: none;
+  }
+
+  .input-field:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(0.60 0.140 52 / 0.12);
+  }
+
+  .input-field.error {
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px oklch(0.55 0.15 25 / 0.10);
+  }
+
+  .input-field::placeholder { color: var(--placeholder); letter-spacing: 0; }
+
+  .error-msg {
+    color: var(--error);
+    font-size: 13px;
+    margin-top: 10px;
+    line-height: 1.4;
+    display: none;
+  }
+
+  .error-msg.visible { display: block; }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 18px;
+    transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px oklch(0.60 0.140 52 / 0.28);
+  }
+
+  .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .alt-cta {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 22px;
+    line-height: 1.55;
+  }
+
+  .alt-cta a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s var(--ease-out), opacity 0.15s var(--ease-out);
+  }
+
+  .alt-cta a:hover {
+    opacity: 0.85;
+    border-bottom-color: var(--accent);
+  }
+
+  .footnote {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-top: 22px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 36px 28px 28px; }
+    .heading { font-size: 28px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo-wrap">
+    <img src="logo.png" alt="Sygnifi">
+    <span class="wordmark">Sygnifi</span>
+  </div>
+  <div class="kicker">Private beta</div>
+  <h1 class="heading">Early access</h1>
+  <p class="sub">Enter your access code to continue.</p>
+
+  <form id="signin-form" novalidate autocomplete="off">
+    <input
+      type="password"
+      id="access-code"
+      class="input-field"
+      placeholder="Access code"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      required
+    >
+    <div class="error-msg" id="error-msg">That code isn't right. Try again.</div>
+    <button type="submit" class="submit-btn" id="submit-btn">Continue</button>
+  </form>
+
+  <div class="alt-cta">
+    Don't have a code? <a href="index.html#early-access">Request early access →</a>
+  </div>
+
+  <div class="footnote">Sygnifi · Field intelligence for biotech</div>
+</div>
+
+<script>
+  const PROXY_URL = 'https://sygnifi-proxy.andrewmcc.workers.dev';
+
+  // If already authenticated this session, skip ahead.
+  if (sessionStorage.getItem('sygnifi_auth') === 'true'
+      && sessionStorage.getItem('sygnifi_code')) {
+    window.location.replace('onboarding.html');
+  }
+
+  const form = document.getElementById('signin-form');
+  const input = document.getElementById('access-code');
+  const errEl = document.getElementById('error-msg');
+  const btn = document.getElementById('submit-btn');
+
+  function showError(msg) {
+    errEl.textContent = msg;
+    input.classList.add('error');
+    errEl.classList.add('visible');
+    input.focus();
+    input.select();
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const code = input.value.trim();
+    if (!code) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
+
+    try {
+      const res = await fetch(PROXY_URL + '/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+
+      if (res.ok) {
+        sessionStorage.setItem('sygnifi_auth', 'true');
+        sessionStorage.setItem('sygnifi_code', code);
+        window.location.href = 'onboarding.html';
+        return;
+      }
+      if (res.status === 401) {
+        showError("That code isn't right. Try again.");
+      } else if (res.status === 429) {
+        showError('Too many attempts. Wait a minute and try again.');
+      } else {
+        showError('Something went wrong. Please try again.');
+      }
+    } catch {
+      showError("Couldn't reach the server. Check your connection.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Continue';
+    }
+  });
+
+  input.addEventListener('input', () => {
+    input.classList.remove('error');
+    errEl.classList.remove('visible');
+  });
+</script>
+
+</body>
+</html>

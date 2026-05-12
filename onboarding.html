@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sygnifi — Onboarding</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:          oklch(0.29 0.072 253);
+    --ink-deep:     oklch(0.23 0.065 253);
+    --paper:        oklch(0.963 0.012 88);
+    --paper-dark:   oklch(0.936 0.018 84);
+    --accent:       oklch(0.60 0.140 52);
+    --accent-light: oklch(0.916 0.030 72);
+    --muted:        oklch(0.49 0.048 234);
+    --border:       oklch(0.836 0.020 82);
+    --placeholder:  oklch(0.77 0.012 80);
+    --error:        oklch(0.55 0.15 25);
+    --ease-out:     cubic-bezier(0.25, 0, 0, 1);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { color-scheme: light; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--ink-deep);
+    color: var(--paper);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 0 oklch(1 0 0 / 0.05), 0 2px 12px oklch(0.23 0.065 253 / 0.22);
+  }
+
+  .topbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .topbar .logo img { height: 28px; display: block; }
+
+  .topbar .wordmark {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    color: var(--paper);
+    letter-spacing: -0.3px;
+  }
+
+  /* PROGRESS BAR */
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 220px;
+  }
+
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: oklch(0.76 0.04 234);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 3px;
+    background: oklch(1 0 0 / 0.10);
+    border-radius: 999px;
+    overflow: hidden;
+    min-width: 120px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    width: 20%;
+    transition: width 0.5s var(--ease-out);
+  }
+
+  /* MAIN WIZARD */
+  .wizard {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 72px 32px 80px;
+  }
+
+  .step { animation: fadeUp 0.45s var(--ease-out) both; }
+  .step[hidden] { display: none; }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--accent);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .step-num::before {
+    content: '';
+    display: block;
+    width: 22px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .step-heading {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(32px, 5vw, 44px);
+    line-height: 1.08;
+    letter-spacing: -0.8px;
+    color: var(--ink-deep);
+    margin-bottom: 14px;
+  }
+
+  .step-sub {
+    font-size: 17px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 36px;
+    font-weight: 300;
+    max-width: 520px;
+  }
+
+  /* TEXTAREA */
+  .textarea {
+    width: 100%;
+    background: oklch(1 0 0);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 16px 18px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    outline: none;
+    line-height: 1.55;
+    resize: vertical;
+    min-height: 64px;
+    transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+    -webkit-appearance: none;
+  }
+
+  .textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(0.60 0.140 52 / 0.12);
+  }
+
+  .textarea::placeholder { color: var(--placeholder); }
+
+  .helper {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 0.4px;
+  }
+
+  .helper.warn { color: var(--error); }
+
+  /* OPTION CARDS — single select */
+  .option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-card {
+    background: oklch(1 0 0);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.15s var(--ease-out), background 0.15s var(--ease-out), transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+    font-family: 'DM Sans', sans-serif;
+    text-align: left;
+    width: 100%;
+  }
+
+  .option-card:hover {
+    border-color: oklch(0.74 0.04 70);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px oklch(0.29 0.072 253 / 0.06);
+  }
+
+  .option-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    box-shadow: 0 0 0 1px var(--accent) inset, 0 6px 18px oklch(0.60 0.140 52 / 0.10);
+  }
+
+  .option-radio {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    position: relative;
+    transition: border-color 0.15s var(--ease-out);
+  }
+
+  .option-card.selected .option-radio {
+    border-color: var(--accent);
+  }
+
+  .option-card.selected .option-radio::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  .option-text { flex: 1; }
+
+  .option-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-deep);
+    line-height: 1.4;
+  }
+
+  .option-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+    line-height: 1.45;
+  }
+
+  /* MULTI-SELECT PILLS */
+  .pill-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .pill {
+    background: oklch(1 0 0);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 10px 18px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink-deep);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.15s var(--ease-out), background 0.15s var(--ease-out), color 0.15s var(--ease-out), transform 0.15s var(--ease-out);
+  }
+
+  .pill::before {
+    content: '+';
+    color: var(--muted);
+    font-weight: 400;
+    transition: color 0.15s var(--ease-out), transform 0.2s var(--ease-out);
+  }
+
+  .pill:hover {
+    border-color: oklch(0.74 0.04 70);
+    transform: translateY(-1px);
+  }
+
+  .pill.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .pill.selected::before {
+    content: '✓';
+    color: white;
+    transform: rotate(0deg);
+  }
+
+  /* NAV ROW */
+  .nav-row {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s var(--ease-out);
+  }
+
+  .btn-back:hover { color: var(--ink-deep); }
+  .btn-back.invisible { visibility: hidden; }
+
+  .btn-skip {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px 4px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--border);
+    transition: color 0.15s var(--ease-out), text-decoration-color 0.15s var(--ease-out);
+  }
+
+  .btn-skip:hover {
+    color: var(--ink-deep);
+    text-decoration-color: var(--ink-deep);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .btn-continue {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 26px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  }
+
+  .btn-continue.big {
+    padding: 15px 30px;
+    font-size: 15.5px;
+    border-radius: 9px;
+  }
+
+  .btn-continue:hover:not(:disabled) {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px oklch(0.60 0.140 52 / 0.30);
+  }
+
+  .btn-continue:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* LOADING STEP */
+  .loading-step {
+    min-height: calc(100vh - 56px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px 80px;
+    text-align: center;
+    animation: fadeUp 0.5s var(--ease-out) both;
+  }
+
+  .radar {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin-bottom: 44px;
+    flex-shrink: 0;
+  }
+
+  .radar-ring {
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: ping 3s var(--ease-out) infinite;
+  }
+
+  .radar-ring:nth-child(2) { animation-delay: 1s; }
+  .radar-ring:nth-child(3) { animation-delay: 2s; }
+
+  .radar-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 5px oklch(0.60 0.140 52 / 0.22);
+    animation: dot-pulse 2.4s ease-in-out infinite;
+  }
+
+  .loading-kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.6px;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+
+  .loading-heading {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(28px, 4vw, 36px);
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    color: var(--ink-deep);
+    max-width: 520px;
+    margin-bottom: 18px;
+  }
+
+  .loading-message {
+    min-height: 28px;
+    font-size: 15px;
+    color: var(--muted);
+    transition: opacity 0.45s var(--ease-out);
+    font-weight: 300;
+    line-height: 1.5;
+    max-width: 460px;
+  }
+
+  .loading-message.fading { opacity: 0; }
+
+  .loading-progress {
+    margin-top: 40px;
+    width: min(360px, 80%);
+    height: 2px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .loading-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -40%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: slide 1.8s var(--ease-out) infinite;
+  }
+
+  .loading-error {
+    margin-top: 32px;
+    background: oklch(0.97 0.015 25);
+    border: 1px solid oklch(0.84 0.06 25);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: oklch(0.35 0.10 30);
+    line-height: 1.5;
+    max-width: 460px;
+    display: none;
+  }
+
+  .loading-error.visible { display: block; }
+
+  .loading-error .retry-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: opacity 0.15s var(--ease-out);
+  }
+
+  .loading-error .retry-btn:hover { opacity: 0.85; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes ping {
+    0%   { transform: scale(0.25); opacity: 0.9; }
+    100% { transform: scale(1);    opacity: 0;   }
+  }
+
+  @keyframes dot-pulse {
+    0%, 100% { box-shadow: 0 0 0 5px oklch(0.60 0.140 52 / 0.22); }
+    50%      { box-shadow: 0 0 0 9px oklch(0.60 0.140 52 / 0.10); }
+  }
+
+  @keyframes slide {
+    0%   { left: -40%; }
+    100% { left: 100%; }
+  }
+
+  @media (max-width: 640px) {
+    .topbar { padding: 0 18px; }
+    .progress { min-width: 0; }
+    .progress-track { min-width: 80px; }
+    .wizard { padding: 48px 22px 64px; }
+    .step-heading { font-size: 28px; letter-spacing: -0.5px; }
+    .step-sub { font-size: 15px; margin-bottom: 28px; }
+    .nav-row { flex-wrap: wrap; }
+    .nav-right { width: 100%; justify-content: flex-end; }
+    .btn-continue { flex: 1; text-align: center; }
+  }
+
+  @media (max-width: 420px) {
+    .progress-label { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    .radar-ring { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="logo" href="index.html">
+    <img src="logo.png" alt="Sygnifi">
+    <span class="wordmark">Sygnifi</span>
+  </a>
+  <div class="progress" id="progress-wrap">
+    <span class="progress-label" id="progress-label">Step 1 of 5</span>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+</div>
+
+<main class="wizard">
+
+  <!-- STEP 1 — Research focus -->
+  <section class="step" id="step-1" data-step="1">
+    <div class="step-num">01 · Your research</div>
+    <h1 class="step-heading">What are you working on?</h1>
+    <p class="step-sub">Describe your research in plain language. The more specific you are, the better your report will be.</p>
+    <textarea
+      id="input-focus"
+      class="textarea"
+      rows="4"
+      placeholder="e.g. We're developing a small molecule inhibitor targeting RUNX2 phosphorylation in treatment-resistant osteosarcoma..."
+    ></textarea>
+    <div class="helper" id="helper-focus">A couple of sentences is plenty.</div>
+    <div class="nav-row">
+      <button class="btn-back invisible" type="button">← Back</button>
+      <div class="nav-right">
+        <button class="btn-continue" id="next-1" type="button" disabled>Continue →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 — Research stage -->
+  <section class="step" id="step-2" data-step="2" hidden>
+    <div class="step-num">02 · Where you are</div>
+    <h1 class="step-heading">Where are you right now?</h1>
+    <p class="step-sub">This helps us weight what's most relevant to you.</p>
+    <div class="option-list" id="stage-list" role="radiogroup" aria-label="Research stage">
+      <button class="option-card" type="button" data-value="pre-discovery" role="radio" aria-checked="false">
+        <span class="option-radio"></span>
+        <span class="option-text">
+          <span class="option-title">Pre-discovery</span>
+          <span class="option-desc">Exploring the landscape</span>
+        </span>
+      </button>
+      <button class="option-card" type="button" data-value="active-discovery" role="radio" aria-checked="false">
+        <span class="option-radio"></span>
+        <span class="option-text">
+          <span class="option-title">Active discovery</span>
+          <span class="option-desc">Experiments underway</span>
+        </span>
+      </button>
+      <button class="option-card" type="button" data-value="pre-filing" role="radio" aria-checked="false">
+        <span class="option-radio"></span>
+        <span class="option-text">
+          <span class="option-title">Pre-filing</span>
+          <span class="option-desc">Approaching patent or publication</span>
+        </span>
+      </button>
+      <button class="option-card" type="button" data-value="pre-fundraise" role="radio" aria-checked="false">
+        <span class="option-radio"></span>
+        <span class="option-text">
+          <span class="option-title">Pre-fundraise</span>
+          <span class="option-desc">Preparing to raise</span>
+        </span>
+      </button>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" type="button" data-back>← Back</button>
+      <div class="nav-right">
+        <button class="btn-continue" id="next-2" type="button" disabled>Continue →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3 — Competitors -->
+  <section class="step" id="step-3" data-step="3" hidden>
+    <div class="step-num">03 · The neighbours</div>
+    <h1 class="step-heading">Who else is working in this space?</h1>
+    <p class="step-sub">Companies, academic groups, or individuals — anyone you keep an eye on.</p>
+    <textarea
+      id="input-competitors"
+      class="textarea"
+      rows="3"
+      placeholder="e.g. Novartis oncology group, Karolinska Development, Broad Institute..."
+    ></textarea>
+    <div class="helper">Comma-separated is fine. Optional — skip if you'd rather we go in blind.</div>
+    <div class="nav-row">
+      <button class="btn-back" type="button" data-back>← Back</button>
+      <div class="nav-right">
+        <button class="btn-skip" id="skip-3" type="button">Skip</button>
+        <button class="btn-continue" id="next-3" type="button">Continue →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4 — Watchlist -->
+  <section class="step" id="step-4" data-step="4" hidden>
+    <div class="step-num">04 · Your watchlist</div>
+    <h1 class="step-heading">What do you most want to be alerted about?</h1>
+    <p class="step-sub">Select everything that matters to you.</p>
+    <div class="pill-grid" id="watch-grid" role="group" aria-label="Watch categories">
+      <button class="pill" type="button" data-value="papers">New papers</button>
+      <button class="pill" type="button" data-value="patents">Patent filings</button>
+      <button class="pill" type="button" data-value="competitors">Competitor activity</button>
+      <button class="pill" type="button" data-value="trials">Clinical trial updates</button>
+    </div>
+    <div class="helper" id="helper-watch">Pick at least one.</div>
+    <div class="nav-row">
+      <button class="btn-back" type="button" data-back>← Back</button>
+      <div class="nav-right">
+        <button class="btn-continue" id="next-4" type="button" disabled>Continue →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 5 — Key terms -->
+  <section class="step" id="step-5" data-step="5" hidden>
+    <div class="step-num">05 · Vocabulary</div>
+    <h1 class="step-heading">Any specific terms we should track?</h1>
+    <p class="step-sub">Genes, proteins, mechanisms, compounds, trial identifiers — anything specific to your work.</p>
+    <textarea
+      id="input-terms"
+      class="textarea"
+      rows="3"
+      placeholder="e.g. RUNX2, Ser451, CBFβ, osteosarcoma, lipid nanoparticle delivery..."
+    ></textarea>
+    <div class="helper">Comma-separated. We'll use these to query PubMed directly.</div>
+    <div class="nav-row">
+      <button class="btn-back" type="button" data-back>← Back</button>
+      <div class="nav-right">
+        <button class="btn-continue big" id="next-5" type="button" disabled>Generate my report →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 6 — Loading -->
+  <section class="step loading-step" id="step-6" hidden>
+    <div class="radar" aria-hidden="true">
+      <div class="radar-ring"></div>
+      <div class="radar-ring"></div>
+      <div class="radar-ring"></div>
+      <div class="radar-center"></div>
+    </div>
+    <div class="loading-kicker">Generating your report</div>
+    <h2 class="loading-heading">Reading the field for you.</h2>
+    <div class="loading-message" id="loading-message" aria-live="polite">Searching PubMed for recent literature...</div>
+    <div class="loading-progress" aria-hidden="true"></div>
+    <div class="loading-error" id="loading-error" role="alert">
+      <strong>Something went wrong generating your report.</strong>
+      <div style="margin-top:6px" id="loading-error-detail">Please try again — if it keeps failing, the proxy may be unavailable.</div>
+      <button class="retry-btn" id="retry-btn" type="button">Try again</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ── Auth guard ────────────────────────────────────────────────
+  const ACCESS_CODE = sessionStorage.getItem('sygnifi_code');
+  if (sessionStorage.getItem('sygnifi_auth') !== 'true' || !ACCESS_CODE) {
+    window.location.replace('signin.html');
+  }
+
+  // ── Constants ─────────────────────────────────────────────────
+  const PROXY_URL = 'https://sygnifi-proxy.andrewmcc.workers.dev';
+  const TOTAL_STEPS = 5;
+
+  const LOADING_MESSAGES = [
+    'Searching PubMed for recent literature...',
+    'Pulling patent filings...',
+    'Analysing competitor signals...',
+    'Contextualising findings against your research...',
+    'Building your report...'
+  ];
+
+  // ── State ─────────────────────────────────────────────────────
+  let currentStep = 1;
+  let context = {
+    focus: '',
+    stage: '',
+    competitors: '',
+    watch: [],
+    terms: ''
+  };
+
+  // Restore any in-flight context (e.g. on accidental refresh).
+  try {
+    const saved = JSON.parse(sessionStorage.getItem('sygnifi_context') || 'null');
+    if (saved && typeof saved === 'object') Object.assign(context, saved);
+  } catch {}
+
+  function saveContext() {
+    sessionStorage.setItem('sygnifi_context', JSON.stringify(context));
+  }
+
+  // ── Navigation ────────────────────────────────────────────────
+  function showStep(n) {
+    document.querySelectorAll('.step').forEach(el => el.hidden = true);
+    const el = document.getElementById('step-' + n);
+    if (!el) return;
+    el.hidden = false;
+    currentStep = n;
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // focus first input on the new step
+    const firstInput = el.querySelector('textarea, .option-card, .pill');
+    if (firstInput && n <= TOTAL_STEPS) setTimeout(() => firstInput.focus(), 80);
+  }
+
+  function updateProgress() {
+    const wrap = document.getElementById('progress-wrap');
+    if (currentStep > TOTAL_STEPS) {
+      wrap.style.visibility = 'hidden';
+      return;
+    }
+    wrap.style.visibility = '';
+    document.getElementById('progress-label').textContent = `Step ${currentStep} of ${TOTAL_STEPS}`;
+    document.getElementById('progress-fill').style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
+  }
+
+  document.querySelectorAll('[data-back]').forEach(btn => {
+    btn.addEventListener('click', () => showStep(currentStep - 1));
+  });
+
+  // ── Step 1 — focus ────────────────────────────────────────────
+  const inputFocus = document.getElementById('input-focus');
+  const helperFocus = document.getElementById('helper-focus');
+  const next1 = document.getElementById('next-1');
+  inputFocus.value = context.focus || '';
+
+  function validateStep1() {
+    const v = inputFocus.value.trim();
+    const ok = v.length >= 20;
+    next1.disabled = !ok;
+    if (v.length === 0) {
+      helperFocus.textContent = 'A couple of sentences is plenty.';
+      helperFocus.classList.remove('warn');
+    } else if (v.length < 20) {
+      helperFocus.textContent = `A little more — ${20 - v.length} more characters.`;
+      helperFocus.classList.add('warn');
+    } else {
+      helperFocus.textContent = 'Looks good.';
+      helperFocus.classList.remove('warn');
+    }
+    return ok;
+  }
+  inputFocus.addEventListener('input', validateStep1);
+  validateStep1();
+  next1.addEventListener('click', () => {
+    if (!validateStep1()) return;
+    context.focus = inputFocus.value.trim();
+    saveContext();
+    showStep(2);
+  });
+
+  // ── Step 2 — stage ────────────────────────────────────────────
+  const stageList = document.getElementById('stage-list');
+  const next2 = document.getElementById('next-2');
+
+  function setStage(value) {
+    context.stage = value;
+    stageList.querySelectorAll('.option-card').forEach(card => {
+      const sel = card.dataset.value === value;
+      card.classList.toggle('selected', sel);
+      card.setAttribute('aria-checked', sel ? 'true' : 'false');
+    });
+    next2.disabled = !value;
+  }
+
+  stageList.querySelectorAll('.option-card').forEach(card => {
+    card.addEventListener('click', () => setStage(card.dataset.value));
+  });
+  if (context.stage) setStage(context.stage);
+
+  next2.addEventListener('click', () => {
+    if (!context.stage) return;
+    saveContext();
+    showStep(3);
+  });
+
+  // ── Step 3 — competitors (optional) ───────────────────────────
+  const inputCompetitors = document.getElementById('input-competitors');
+  const next3 = document.getElementById('next-3');
+  const skip3 = document.getElementById('skip-3');
+  inputCompetitors.value = context.competitors || '';
+
+  function advanceFromStep3(skip) {
+    context.competitors = skip ? '' : inputCompetitors.value.trim();
+    saveContext();
+    showStep(4);
+  }
+  next3.addEventListener('click', () => advanceFromStep3(false));
+  skip3.addEventListener('click', () => advanceFromStep3(true));
+
+  // ── Step 4 — watch (multi) ────────────────────────────────────
+  const watchGrid = document.getElementById('watch-grid');
+  const next4 = document.getElementById('next-4');
+  const helperWatch = document.getElementById('helper-watch');
+
+  function refreshWatch() {
+    watchGrid.querySelectorAll('.pill').forEach(p => {
+      p.classList.toggle('selected', context.watch.includes(p.dataset.value));
+    });
+    next4.disabled = context.watch.length === 0;
+    helperWatch.textContent = context.watch.length === 0
+      ? 'Pick at least one.'
+      : `${context.watch.length} selected.`;
+    helperWatch.classList.toggle('warn', context.watch.length === 0);
+  }
+
+  watchGrid.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const v = pill.dataset.value;
+      const i = context.watch.indexOf(v);
+      if (i === -1) context.watch.push(v);
+      else context.watch.splice(i, 1);
+      refreshWatch();
+    });
+  });
+  refreshWatch();
+
+  next4.addEventListener('click', () => {
+    if (context.watch.length === 0) return;
+    saveContext();
+    showStep(5);
+  });
+
+  // ── Step 5 — terms ────────────────────────────────────────────
+  const inputTerms = document.getElementById('input-terms');
+  const next5 = document.getElementById('next-5');
+  inputTerms.value = context.terms || '';
+
+  function validateStep5() {
+    const ok = inputTerms.value.trim().length >= 5;
+    next5.disabled = !ok;
+    return ok;
+  }
+  inputTerms.addEventListener('input', validateStep5);
+  validateStep5();
+
+  next5.addEventListener('click', () => {
+    if (!validateStep5()) return;
+    context.terms = inputTerms.value.trim();
+    saveContext();
+    showStep(6);
+    generateReport();
+  });
+
+  // Initial step
+  showStep(1);
+
+  // ── LOADING screen ────────────────────────────────────────────
+  let messageTimer = null;
+  function startMessageCycle() {
+    const el = document.getElementById('loading-message');
+    let i = 0;
+    el.textContent = LOADING_MESSAGES[i];
+    el.classList.remove('fading');
+    clearInterval(messageTimer);
+    messageTimer = setInterval(() => {
+      el.classList.add('fading');
+      setTimeout(() => {
+        i = (i + 1) % LOADING_MESSAGES.length;
+        el.textContent = LOADING_MESSAGES[i];
+        el.classList.remove('fading');
+      }, 450);
+    }, 2500);
+  }
+  function stopMessageCycle() {
+    clearInterval(messageTimer);
+    messageTimer = null;
+  }
+
+  document.getElementById('retry-btn').addEventListener('click', () => {
+    document.getElementById('loading-error').classList.remove('visible');
+    generateReport();
+  });
+
+  // ── PubMed fetch ──────────────────────────────────────────────
+  async function fetchPubMedPapers(terms) {
+    const cleanTerms = terms
+      .split(/[,\n]/)
+      .map(t => t.trim())
+      .filter(Boolean);
+    if (cleanTerms.length === 0) return [];
+
+    const query = cleanTerms.map(t => `"${t}"`).join(' OR ');
+
+    // 1) esearch
+    const searchUrl = new URL('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi');
+    searchUrl.searchParams.set('db', 'pubmed');
+    searchUrl.searchParams.set('term', query);
+    searchUrl.searchParams.set('retmax', '10');
+    searchUrl.searchParams.set('sort', 'date');
+    searchUrl.searchParams.set('retmode', 'json');
+
+    let pmids = [];
+    try {
+      const r = await fetch(searchUrl.toString());
+      if (r.ok) {
+        const j = await r.json();
+        pmids = (j.esearchresult && j.esearchresult.idlist) || [];
+      }
+    } catch (e) {
+      console.warn('PubMed esearch failed', e);
+      return [];
+    }
+    if (pmids.length === 0) return [];
+
+    // 2) efetch
+    const fetchUrl = new URL('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi');
+    fetchUrl.searchParams.set('db', 'pubmed');
+    fetchUrl.searchParams.set('id', pmids.join(','));
+    fetchUrl.searchParams.set('rettype', 'abstract');
+    fetchUrl.searchParams.set('retmode', 'xml');
+
+    let xmlText = '';
+    try {
+      const r = await fetch(fetchUrl.toString());
+      if (!r.ok) return [];
+      xmlText = await r.text();
+    } catch (e) {
+      console.warn('PubMed efetch failed', e);
+      return [];
+    }
+
+    return parsePubMedXml(xmlText);
+  }
+
+  function parsePubMedXml(xmlText) {
+    const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+    const articles = Array.from(doc.querySelectorAll('PubmedArticle'));
+    return articles.map(a => {
+      const text = sel => {
+        const n = a.querySelector(sel);
+        return n ? n.textContent.trim() : '';
+      };
+      const title = text('Article > ArticleTitle');
+      const journal = text('Article > Journal > Title') || text('Article > Journal > ISOAbbreviation');
+
+      // Date — prefer ArticleDate, fall back to PubDate
+      let pubDate = '';
+      const articleDate = a.querySelector('Article > ArticleDate');
+      const journalIssueDate = a.querySelector('Article > Journal > JournalIssue > PubDate');
+      const dateNode = articleDate || journalIssueDate;
+      if (dateNode) {
+        const year = dateNode.querySelector('Year')?.textContent;
+        const month = dateNode.querySelector('Month')?.textContent;
+        const medlineDate = dateNode.querySelector('MedlineDate')?.textContent;
+        if (medlineDate) pubDate = medlineDate;
+        else if (year && month) pubDate = `${month} ${year}`;
+        else if (year) pubDate = year;
+      }
+
+      // Authors — first three lastnames + et al.
+      const authorNodes = Array.from(a.querySelectorAll('Article > AuthorList > Author')).slice(0, 4);
+      const authorStrs = authorNodes.map(au => {
+        const last = au.querySelector('LastName')?.textContent || '';
+        const init = au.querySelector('Initials')?.textContent || '';
+        return [last, init].filter(Boolean).join(' ');
+      }).filter(Boolean);
+      let authors = authorStrs.slice(0, 3).join(', ');
+      if (authorStrs.length > 3) authors += ', et al.';
+
+      // Abstract — may have multiple AbstractText nodes (labeled)
+      const abstractNodes = Array.from(a.querySelectorAll('Article > Abstract > AbstractText'));
+      const abstract = abstractNodes.map(n => {
+        const label = n.getAttribute('Label');
+        const body = n.textContent.trim();
+        return label ? `${label}: ${body}` : body;
+      }).join(' ');
+
+      const pmid = a.querySelector('MedlineCitation > PMID')?.textContent || '';
+
+      return { title, journal, pubDate, authors, abstract, pmid };
+    }).filter(p => p.title);
+  }
+
+  // ── Anthropic call via proxy ──────────────────────────────────
+  function stripJsonFences(s) {
+    let t = s.trim();
+    // strip ``` or ```json fences if present
+    t = t.replace(/^```(?:json)?\s*/i, '');
+    t = t.replace(/```\s*$/, '');
+    // grab the first { ... } block as a fallback
+    const first = t.indexOf('{');
+    const last = t.lastIndexOf('}');
+    if (first !== -1 && last !== -1 && last > first) {
+      t = t.slice(first, last + 1);
+    }
+    return t.trim();
+  }
+
+  const WATCH_LABELS = {
+    papers: 'New papers',
+    patents: 'Patent filings',
+    competitors: 'Competitor activity',
+    trials: 'Clinical trial updates'
+  };
+
+  const STAGE_LABELS = {
+    'pre-discovery': 'Pre-discovery — exploring the landscape',
+    'active-discovery': 'Active discovery — experiments underway',
+    'pre-filing': 'Pre-filing — approaching patent or publication',
+    'pre-fundraise': 'Pre-fundraise — preparing to raise'
+  };
+
+  function buildUserPrompt(papers) {
+    const watchLabels = (context.watch || []).map(w => WATCH_LABELS[w] || w).join(', ');
+    const stageLabel = STAGE_LABELS[context.stage] || context.stage;
+    const compsLine = context.competitors && context.competitors.trim()
+      ? context.competitors.trim()
+      : 'none specified';
+
+    let papersBlock;
+    if (papers.length === 0) {
+      papersBlock = 'No PubMed results were returned for these terms. Return an empty papers array — do not invent any.';
+    } else {
+      papersBlock = papers.map((p, i) => {
+        const abs = (p.abstract || '').slice(0, 1600);
+        return `[${i + 1}] TITLE: ${p.title}
+JOURNAL: ${p.journal || 'unknown'}
+DATE: ${p.pubDate || 'unknown'}
+AUTHORS: ${p.authors || 'unknown'}
+ABSTRACT: ${abs || '(no abstract available)'}`;
+      }).join('\n\n');
+    }
+
+    return `Generate a field intelligence report for a research team.
+
+THEIR RESEARCH CONTEXT:
+${context.focus}
+
+STAGE: ${stageLabel}
+
+COMPETITORS THEY WATCH: ${compsLine}
+
+THEY WANT TO TRACK: ${watchLabels || 'unspecified'}
+
+KEY TERMS: ${context.terms}
+
+REAL PAPERS FETCHED FROM PUBMED:
+${papersBlock}
+
+Generate a JSON response with exactly this structure:
+{
+  "report_title": "X developments worth your attention in [their topic] this week",
+  "field_signal": {
+    "headline": "short signal headline",
+    "body": "2-3 sentence field signal observation"
+  },
+  "papers": [
+    {
+      "title": "real paper title from pubmed",
+      "journal": "journal name",
+      "date": "pub date",
+      "authors": "author string",
+      "summary": "2-3 sentence plain-English summary",
+      "relevance": "high|medium|watch",
+      "why_it_matters": "1-2 sentences specific to their research context"
+    }
+  ],
+  "patents": [
+    {
+      "id": "plausible patent ID",
+      "title": "patent title",
+      "assignee": "company or institution",
+      "filed": "approximate date",
+      "status": "Application|Granted",
+      "summary": "2 sentence summary",
+      "conflict_flag": null
+    }
+  ],
+  "competitors": [
+    {
+      "name": "competitor name",
+      "activity_level": "high|medium|low",
+      "detail": "2 sentence activity summary"
+    }
+  ],
+  "field_pulse": "3-4 sentence paragraph on where the field is heading, analytically sharp",
+  "summary_stats": {
+    "papers_found": number,
+    "high_relevance": number,
+    "patents": number
+  }
+}
+
+For papers: only use the real PubMed papers provided. Do not invent papers. Preserve the exact titles, journals, dates, and authors from the data above. Set relevance honestly based on how close each paper is to the team's stated research and key terms. The why_it_matters line must reference something specific about the team's research context, not a generic statement.
+
+For patents and competitors: generate plausible, analytically grounded content based on the field. 2–4 patents and 2–4 competitors is right. Use conflict_flag to flag an FTO concern if and only if it's directly relevant; otherwise null.
+
+For summary_stats: papers_found should equal the length of the papers array; high_relevance should equal the count of papers with relevance "high"; patents should equal the length of the patents array.
+
+Return only valid JSON, no markdown, no preamble.`;
+  }
+
+  const SYSTEM_PROMPT = `You are a research intelligence analyst for early-stage biotech companies. Your job is to synthesise scientific literature and field signals into actionable intelligence, contextualised against a specific team's research. Be specific, direct, and analytically sharp. Never be generic.`;
+
+  async function callAnthropic(papers) {
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Access-Code': ACCESS_CODE
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: buildUserPrompt(papers) }]
+      })
+    });
+    if (res.status === 401) {
+      // Code was revoked or sessionStorage was tampered with.
+      sessionStorage.removeItem('sygnifi_auth');
+      sessionStorage.removeItem('sygnifi_code');
+      window.location.replace('signin.html');
+      throw new Error('Access code rejected — please sign in again.');
+    }
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(`Proxy returned ${res.status}: ${body.slice(0, 200)}`);
+    }
+    const data = await res.json();
+    const text = data?.content?.[0]?.text;
+    if (!text) throw new Error('Empty response from model.');
+    const parsed = JSON.parse(stripJsonFences(text));
+    return parsed;
+  }
+
+  // ── Orchestrator ──────────────────────────────────────────────
+  async function generateReport() {
+    document.getElementById('loading-error').classList.remove('visible');
+    startMessageCycle();
+    try {
+      const papers = await fetchPubMedPapers(context.terms);
+      const report = await callAnthropic(papers);
+
+      // Light validation + sanitization
+      if (!report || typeof report !== 'object') throw new Error('Malformed response.');
+      report.papers = Array.isArray(report.papers) ? report.papers : [];
+      report.patents = Array.isArray(report.patents) ? report.patents : [];
+      report.competitors = Array.isArray(report.competitors) ? report.competitors : [];
+      if (!report.summary_stats || typeof report.summary_stats !== 'object') {
+        report.summary_stats = {
+          papers_found: report.papers.length,
+          high_relevance: report.papers.filter(p => p.relevance === 'high').length,
+          patents: report.patents.length
+        };
+      }
+
+      sessionStorage.setItem('sygnifi_report', JSON.stringify(report));
+      sessionStorage.setItem('sygnifi_report_generated_at', new Date().toISOString());
+      stopMessageCycle();
+      window.location.href = 'report.html';
+    } catch (err) {
+      console.error('Report generation failed', err);
+      stopMessageCycle();
+      const detail = document.getElementById('loading-error-detail');
+      detail.textContent = err && err.message
+        ? `Reason: ${err.message}. Try again — if it keeps failing, the proxy may be unavailable.`
+        : 'Please try again — if it keeps failing, the proxy may be unavailable.';
+      document.getElementById('loading-error').classList.add('visible');
+    }
+  }
+</script>
+
+</body>
+</html>

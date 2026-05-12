@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sygnifi — Your field intelligence report</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:          oklch(0.29 0.072 253);
+    --ink-deep:     oklch(0.23 0.065 253);
+    --paper:        oklch(0.963 0.012 88);
+    --paper-dark:   oklch(0.936 0.018 84);
+    --accent:       oklch(0.60 0.140 52);
+    --accent-light: oklch(0.916 0.030 72);
+    --muted:        oklch(0.49 0.048 234);
+    --border:       oklch(0.836 0.020 82);
+    --placeholder:  oklch(0.77 0.012 80);
+    --green:        oklch(0.38 0.10 155);
+    --green-light:  oklch(0.93 0.04 150);
+    --amber:        oklch(0.40 0.10 62);
+    --amber-light:  oklch(0.96 0.04 85);
+    --blue:         oklch(0.29 0.072 253);
+    --blue-light:   oklch(0.93 0.025 234);
+    --ease-out:     cubic-bezier(0.25, 0, 0, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { color-scheme: light; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--ink-deep);
+    color: var(--paper);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 0 oklch(1 0 0 / 0.05), 0 2px 12px oklch(0.23 0.065 253 / 0.22);
+  }
+
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--paper);
+    text-decoration: none;
+  }
+
+  .logo img { height: 26px; display: block; }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    color: oklch(0.76 0.04 234);
+  }
+
+  .badge-live {
+    background: var(--accent);
+    color: var(--paper);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    animation: badge-pulse 2.8s ease-in-out infinite;
+  }
+
+  .topbar-right .new-report {
+    color: oklch(0.76 0.04 234);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 0;
+    border-bottom: 1px solid oklch(1 0 0 / 0.15);
+    transition: color 0.15s var(--ease-out), border-color 0.15s var(--ease-out);
+  }
+
+  .topbar-right .new-report:hover {
+    color: var(--paper);
+    border-color: oklch(1 0 0 / 0.5);
+  }
+
+  /* REPORT HEADER */
+  .report-header {
+    border-bottom: 1px solid var(--border);
+    padding: 32px 32px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    animation: fadeUp 0.5s var(--ease-out) both;
+  }
+
+  .report-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  .report-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    max-width: 640px;
+    color: var(--ink-deep);
+  }
+
+  .report-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .coverage-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+
+  .tag-sources { background: var(--paper-dark); color: var(--muted); }
+
+  /* SUMMARY STRIP */
+  .summary-strip {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 18px 32px;
+    display: flex;
+    gap: 40px;
+    animation: fadeUp 0.5s 0.1s var(--ease-out) both;
+  }
+
+  .summary-item { display: flex; flex-direction: column; gap: 2px; }
+
+  .summary-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--paper);
+  }
+
+  .summary-num span { color: var(--accent); }
+
+  .summary-label {
+    font-size: 11px;
+    color: oklch(0.71 0.05 234);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-divider {
+    width: 1px;
+    background: oklch(0.37 0.07 253);
+    margin: 4px 0;
+  }
+
+  /* SIGNAL BANNER */
+  .signal-banner {
+    margin: 24px 32px 0;
+    background: var(--accent-light);
+    border: 1px solid oklch(0.83 0.05 65);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    animation: fadeUp 0.5s 0.15s var(--ease-out) both;
+  }
+
+  .signal-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  .signal-text strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+
+  .signal-text p { font-size: 13px; color: oklch(0.33 0.08 42); line-height: 1.5; }
+
+  /* MAIN GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+  }
+
+  .main-col { padding: 28px 32px; border-right: 1px solid var(--border); }
+  .side-col { padding: 28px 24px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .section-aux {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.4px;
+  }
+
+  .section-aux em { font-style: italic; color: var(--muted); }
+
+  /* PAPER CARDS */
+  .paper-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: oklch(1 0 0);
+    transition: box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+    animation: fadeUp 0.5s var(--ease-out) both;
+  }
+
+  .paper-card:hover {
+    box-shadow: 0 2px 4px oklch(0.29 0.072 253 / 0.04), 0 8px 24px oklch(0.29 0.072 253 / 0.10);
+    transform: translateY(-2px);
+    border-color: oklch(0.76 0.018 80);
+  }
+
+  .paper-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .paper-title { font-size: 14px; font-weight: 600; line-height: 1.4; flex: 1; color: var(--ink-deep); }
+
+  .relevance-badge {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    text-transform: capitalize;
+  }
+
+  .rel-high  { background: var(--green-light); color: var(--green); }
+  .rel-med   { background: var(--amber-light); color: var(--amber); }
+  .rel-watch { background: var(--blue-light);  color: var(--blue);  }
+
+  .paper-summary { font-size: 13px; color: oklch(0.38 0.005 250); line-height: 1.55; margin-bottom: 10px; }
+
+  .paper-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .why-matters {
+    background: var(--paper-dark);
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: oklch(0.38 0.005 250);
+    margin-top: 8px;
+    margin-bottom: 10px;
+    transition: background 0.2s var(--ease-out);
+  }
+
+  .paper-card:hover .why-matters { background: oklch(0.91 0.018 84); }
+
+  .why-matters strong {
+    color: var(--accent);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* PATENT CARDS */
+  .patent-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: oklch(1 0 0);
+    animation: fadeUp 0.5s var(--ease-out) both;
+    transition: box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+  }
+
+  .patent-card:hover {
+    box-shadow: 0 2px 4px oklch(0.29 0.072 253 / 0.04), 0 6px 18px oklch(0.29 0.072 253 / 0.09);
+    transform: translateY(-2px);
+    border-color: oklch(0.76 0.018 80);
+  }
+
+  .patent-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .patent-id {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .patent-illustrative {
+    font-style: italic;
+    color: var(--muted);
+    margin-left: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+  }
+
+  .patent-status { font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 7px; border-radius: 4px; }
+  .status-filed   { background: var(--amber-light); color: var(--amber); }
+  .status-granted { background: var(--green-light); color: var(--green); }
+
+  .patent-title    { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; color: var(--ink-deep); }
+  .patent-assignee { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .patent-summary  { font-size: 12px; color: oklch(0.38 0.005 250); line-height: 1.5; }
+
+  .conflict-flag {
+    margin-top: 8px;
+    background: oklch(0.97 0.015 25);
+    border: 1px solid oklch(0.84 0.06 25);
+    border-radius: 5px;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: oklch(0.35 0.10 30);
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  /* SIDEBAR */
+  .side-section { margin-bottom: 28px; animation: fadeUp 0.4s 0.3s var(--ease-out) both; }
+
+  .field-pulse {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 28px;
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.07), inset 0 -1px 0 oklch(0 0 0 / 0.15);
+    transition: box-shadow 0.25s var(--ease-out);
+    animation: fadeUp 0.4s 0.25s var(--ease-out) both;
+  }
+
+  .field-pulse:hover {
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.10), inset 0 -1px 0 oklch(0 0 0 / 0.15), 0 4px 16px oklch(0.23 0.065 253 / 0.20);
+  }
+
+  .pulse-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--paper);
+  }
+
+  .pulse-body { font-size: 12px; color: oklch(0.76 0.04 234); line-height: 1.6; }
+  .pulse-body strong { color: var(--paper); }
+
+  .competitor-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .competitor-item:last-child { border-bottom: none; }
+  .competitor-item:hover .comp-name { color: var(--accent); }
+
+  .comp-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .comp-name   { font-weight: 600; font-size: 13px; color: var(--ink-deep); transition: color 0.15s var(--ease-out); }
+
+  .comp-activity {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-transform: capitalize;
+  }
+
+  .activity-high { background: oklch(0.97 0.015 25); color: oklch(0.45 0.14 25); }
+  .activity-med  { background: var(--amber-light); color: var(--amber); }
+  .activity-low  { background: var(--paper-dark);  color: var(--muted); }
+  .comp-detail   { font-size: 12px; color: oklch(0.42 0.005 250); line-height: 1.4; }
+
+  /* ASK BOX */
+  .ask-box {
+    background: var(--paper-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    position: relative;
+  }
+
+  .ask-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .ask-soon {
+    font-size: 9px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 2px 6px;
+    border-radius: 999px;
+    letter-spacing: 0.6px;
+  }
+
+  .ask-input {
+    width: 100%;
+    background: oklch(1 0 0);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    outline: none;
+    resize: none;
+    height: 64px;
+    transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+  }
+
+  .ask-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(0.60 0.140 52 / 0.12);
+  }
+
+  .ask-btn {
+    margin-top: 8px;
+    width: 100%;
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    border-radius: 6px;
+    padding: 9px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: not-allowed;
+    opacity: 0.55;
+    transition: opacity 0.15s var(--ease-out);
+  }
+
+  .ask-suggestions {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .suggestion-chip {
+    font-size: 11px;
+    color: var(--muted);
+    background: oklch(1 0 0);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: default;
+    line-height: 1.3;
+    text-align: left;
+  }
+
+  /* FOOTER */
+  .report-footer {
+    border-top: 1px solid oklch(1 0 0 / 0.06);
+    background: var(--ink-deep);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: oklch(0.69 0.01 88);
+    font-family: 'DM Mono', monospace;
+    gap: 16px;
+  }
+
+  .footer-brand {
+    font-family: 'Instrument Serif', serif;
+    font-size: 14px;
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-brand img { height: 20px; display: block; opacity: 0.7; }
+
+  .section-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  .empty-note {
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--paper-dark);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    line-height: 1.5;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes badge-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.7; }
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--paper); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .topbar { padding: 0 16px; }
+
+    .report-header {
+      flex-direction: column;
+      padding: 20px 16px 16px;
+      gap: 16px;
+    }
+
+    .report-title { font-size: 24px; }
+
+    .report-actions {
+      align-items: flex-start;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .coverage-tags { justify-content: flex-start; }
+
+    .summary-strip {
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .summary-divider { display: none; }
+    .summary-num { font-size: 22px; }
+    .signal-banner { margin: 16px 16px 0; }
+
+    .main-grid { display: block; }
+
+    .main-col {
+      padding: 20px 16px;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .side-col { padding: 20px 16px; }
+    .field-pulse { margin-bottom: 20px; }
+
+    .report-footer {
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="logo">
+    <img src="logo.png" alt="Sygnifi">
+    Sygnifi
+  </a>
+  <div class="topbar-right">
+    <span>Your workspace</span>
+    <span class="badge-live" id="topbar-badge">Weekly · —</span>
+    <a class="new-report" href="onboarding.html" id="new-report-link">↻ New report</a>
+  </div>
+</div>
+
+<!-- REPORT HEADER -->
+<div class="report-header">
+  <div>
+    <div class="report-meta" id="report-meta">Field Intelligence Report</div>
+    <h1 class="report-title" id="report-title">Your field intelligence report</h1>
+  </div>
+  <div class="report-actions">
+    <div class="coverage-tags">
+      <span class="tag tag-sources">PubMed</span>
+      <span class="tag tag-sources">Patents (illustrative)</span>
+      <span class="tag tag-sources">Competitor signals</span>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY STRIP -->
+<div class="summary-strip" id="summary-strip">
+  <div class="summary-item">
+    <div class="summary-num" id="stat-papers">0</div>
+    <div class="summary-label">New papers</div>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-item">
+    <div class="summary-num"><span id="stat-high">0</span></div>
+    <div class="summary-label">High relevance</div>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-item">
+    <div class="summary-num" id="stat-patents">0</div>
+    <div class="summary-label">Patents tracked</div>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-item">
+    <div class="summary-num"><span>!</span></div>
+    <div class="summary-label">Field signal</div>
+  </div>
+</div>
+
+<!-- SIGNAL BANNER -->
+<div class="signal-banner">
+  <div class="signal-icon">⚡</div>
+  <div class="signal-text">
+    <strong id="signal-headline">Field signal this week</strong>
+    <p id="signal-body">—</p>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+
+  <div class="main-col">
+
+    <div class="section-header">
+      <div class="section-title">Recent Literature</div>
+      <span class="section-aux" id="papers-count"></span>
+    </div>
+    <div id="papers-list"></div>
+
+    <hr class="section-divider">
+
+    <div class="section-header">
+      <div class="section-title">Patent Filings</div>
+      <span class="section-aux"><em>Illustrative</em></span>
+    </div>
+    <div id="patents-list"></div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="side-col">
+
+    <div class="field-pulse">
+      <div class="pulse-title">🧭 Where the field is heading</div>
+      <div class="pulse-body" id="field-pulse-body">—</div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-header">
+        <div class="section-title">Competitor Activity</div>
+      </div>
+      <div id="competitors-list"></div>
+    </div>
+
+    <!-- ASK SYGNIFI -->
+    <div class="ask-box">
+      <div class="ask-label">
+        <span>Ask Sygnifi about this report</span>
+        <span class="ask-soon">Soon</span>
+      </div>
+      <textarea class="ask-input" placeholder="e.g. Which paper this week is most relevant to our program?" disabled></textarea>
+      <button class="ask-btn" disabled>Ask →</button>
+      <div class="ask-suggestions">
+        <div class="suggestion-chip">Walk me through the most important paper this week.</div>
+        <div class="suggestion-chip">Which patent activity should I worry about?</div>
+        <div class="suggestion-chip">Where is this field heading next?</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="report-footer">
+  <div id="footer-sources">Sources: PubMed E-utilities · Patents illustrative · Generated —</div>
+  <div class="footer-brand">
+    <img src="logo.png" alt="Sygnifi">
+    Sygnifi
+  </div>
+</div>
+
+<script>
+  // ── Guard ────────────────────────────────────────────────────
+  const reportRaw = sessionStorage.getItem('sygnifi_report');
+  if (!reportRaw) {
+    window.location.replace('onboarding.html');
+  }
+
+  let report;
+  try {
+    report = JSON.parse(reportRaw);
+  } catch {
+    window.location.replace('onboarding.html');
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function shortDate(d) { return `${MONTHS[d.getMonth()]} ${d.getDate()}`; }
+  function longDate(d)  { return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`; }
+
+  function relevanceClass(r) {
+    const v = String(r || '').toLowerCase();
+    if (v === 'high')   return 'rel-high';
+    if (v === 'medium') return 'rel-med';
+    if (v === 'watch')  return 'rel-watch';
+    return 'rel-watch';
+  }
+
+  function relevanceLabel(r) {
+    const v = String(r || '').toLowerCase();
+    if (v === 'high')   return 'High';
+    if (v === 'medium') return 'Medium';
+    if (v === 'watch')  return 'Watch';
+    return r || 'Watch';
+  }
+
+  function activityClass(a) {
+    const v = String(a || '').toLowerCase();
+    if (v === 'high')   return 'activity-high';
+    if (v === 'medium' || v === 'med') return 'activity-med';
+    if (v === 'low')    return 'activity-low';
+    return 'activity-low';
+  }
+
+  function activityLabel(a) {
+    const v = String(a || '').toLowerCase();
+    if (v === 'high')   return '↑ High';
+    if (v === 'medium' || v === 'med') return '→ Active';
+    if (v === 'low')    return '◦ Watch';
+    return a || '';
+  }
+
+  function statusClass(s) {
+    const v = String(s || '').toLowerCase();
+    if (v === 'granted') return 'status-granted';
+    return 'status-filed';
+  }
+
+  // ── Render ───────────────────────────────────────────────────
+  const generatedAt = sessionStorage.getItem('sygnifi_report_generated_at');
+  const now = generatedAt ? new Date(generatedAt) : new Date();
+
+  // Topbar
+  document.getElementById('topbar-badge').textContent = `Weekly · ${shortDate(now)}`;
+
+  // Report meta + title
+  document.getElementById('report-meta').textContent =
+    `Field Intelligence Report · ${longDate(now)}`;
+  document.getElementById('report-title').textContent =
+    report.report_title || 'Your field intelligence report';
+
+  // Summary stats
+  const stats = report.summary_stats || {};
+  const papersCount = stats.papers_found ?? (report.papers || []).length;
+  const highCount = stats.high_relevance ?? (report.papers || []).filter(p => String(p.relevance).toLowerCase() === 'high').length;
+  const patentsCount = stats.patents ?? (report.patents || []).length;
+  document.getElementById('stat-papers').textContent = papersCount;
+  document.getElementById('stat-high').textContent = highCount;
+  document.getElementById('stat-patents').textContent = patentsCount;
+
+  // Signal banner
+  const signal = report.field_signal || {};
+  if (signal.headline) document.getElementById('signal-headline').textContent = signal.headline;
+  document.getElementById('signal-body').textContent = signal.body || '';
+
+  // Papers
+  const papersList = document.getElementById('papers-list');
+  const papers = report.papers || [];
+  document.getElementById('papers-count').textContent =
+    papers.length ? `${papers.length} this week` : '';
+
+  if (papers.length === 0) {
+    papersList.innerHTML = `<div class="empty-note">No new PubMed results matched your terms this week. Try broader terms next time, or check back on Monday.</div>`;
+  } else {
+    papersList.innerHTML = papers.map((p, i) => `
+      <article class="paper-card" style="animation-delay:${(0.15 + i * 0.08).toFixed(2)}s">
+        <div class="paper-top">
+          <div class="paper-title">${esc(p.title)}</div>
+          <span class="relevance-badge ${relevanceClass(p.relevance)}">${esc(relevanceLabel(p.relevance))}</span>
+        </div>
+        <div class="paper-summary">${esc(p.summary)}</div>
+        ${p.why_it_matters ? `
+        <div class="why-matters">
+          <strong>Why this matters to you</strong>
+          ${esc(p.why_it_matters)}
+        </div>` : ''}
+        <div class="paper-footer">
+          ${p.journal ? `<span>📄 ${esc(p.journal)}</span>` : ''}
+          ${p.date    ? `<span>📅 ${esc(p.date)}</span>` : ''}
+          ${p.authors ? `<span>👥 ${esc(p.authors)}</span>` : ''}
+        </div>
+      </article>
+    `).join('');
+  }
+
+  // Patents
+  const patentsList = document.getElementById('patents-list');
+  const patents = report.patents || [];
+  if (patents.length === 0) {
+    patentsList.innerHTML = `<div class="empty-note">No patent activity surfaced this week.</div>`;
+  } else {
+    patentsList.innerHTML = patents.map((p, i) => `
+      <article class="patent-card" style="animation-delay:${(0.20 + i * 0.08).toFixed(2)}s">
+        <div class="patent-top">
+          <div>
+            <div class="patent-id">${esc(p.id || '—')}${p.filed ? ` · ${esc(p.filed)}` : ''} <span class="patent-illustrative">(illustrative)</span></div>
+            <div class="patent-title">${esc(p.title)}</div>
+            ${p.assignee ? `<div class="patent-assignee">Assignee: ${esc(p.assignee)}</div>` : ''}
+          </div>
+          <span class="patent-status ${statusClass(p.status)}">${esc(p.status || 'Application')}</span>
+        </div>
+        ${p.summary ? `<div class="patent-summary">${esc(p.summary)}</div>` : ''}
+        ${p.conflict_flag ? `
+        <div class="conflict-flag">
+          ⚠️ <span>${esc(p.conflict_flag)}</span>
+        </div>` : ''}
+      </article>
+    `).join('');
+  }
+
+  // Field pulse
+  document.getElementById('field-pulse-body').textContent = report.field_pulse || '';
+
+  // Competitors
+  const compList = document.getElementById('competitors-list');
+  const comps = report.competitors || [];
+  if (comps.length === 0) {
+    compList.innerHTML = `<div class="empty-note">No competitor activity this week.</div>`;
+  } else {
+    compList.innerHTML = comps.map(c => `
+      <div class="competitor-item">
+        <div class="comp-header">
+          <div class="comp-name">${esc(c.name)}</div>
+          <span class="comp-activity ${activityClass(c.activity_level)}">${esc(activityLabel(c.activity_level))}</span>
+        </div>
+        <div class="comp-detail">${esc(c.detail)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Footer
+  document.getElementById('footer-sources').textContent =
+    `Sources: PubMed E-utilities · Patents illustrative · Generated ${longDate(now)}`;
+</script>
+
+</body>
+</html>
