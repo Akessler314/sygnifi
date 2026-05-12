@@ -472,17 +472,32 @@
     margin-bottom: 18px;
   }
 
-  .loading-message {
-    min-height: 28px;
-    font-size: 15px;
-    color: var(--muted);
-    transition: opacity 0.45s var(--ease-out);
-    font-weight: 300;
-    line-height: 1.5;
+  .loading-message-wrap {
+    position: relative;
+    width: 100%;
     max-width: 460px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .loading-message.fading { opacity: 0; }
+  .loading-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-weight: 300;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out);
+    will-change: opacity;
+  }
+
+  .loading-message.active { opacity: 1; }
 
   .loading-progress {
     margin-top: 40px;
@@ -730,7 +745,10 @@
     </div>
     <div class="loading-kicker">Generating your report</div>
     <h2 class="loading-heading">Reading the field for you.</h2>
-    <div class="loading-message" id="loading-message" aria-live="polite">Searching PubMed for recent literature...</div>
+    <div class="loading-message-wrap" aria-live="polite">
+      <div class="loading-message notranslate active" id="loading-message-a" translate="no">Searching PubMed for recent literature...</div>
+      <div class="loading-message notranslate" id="loading-message-b" translate="no"></div>
+    </div>
     <div class="loading-progress" aria-hidden="true"></div>
     <div class="loading-error" id="loading-error" role="alert">
       <strong>Something went wrong generating your report.</strong>
@@ -953,19 +971,24 @@
   // ── LOADING screen ────────────────────────────────────────────
   let messageTimer = null;
   function startMessageCycle() {
-    const el = document.getElementById('loading-message');
+    const a = document.getElementById('loading-message-a');
+    const b = document.getElementById('loading-message-b');
+    const els = [a, b];
+    let active = 0;
     let i = 0;
-    el.textContent = LOADING_MESSAGES[i];
-    el.classList.remove('fading');
+    a.textContent = LOADING_MESSAGES[0];
+    a.classList.add('active');
+    b.textContent = '';
+    b.classList.remove('active');
     clearInterval(messageTimer);
     messageTimer = setInterval(() => {
-      el.classList.add('fading');
-      setTimeout(() => {
-        i = (i + 1) % LOADING_MESSAGES.length;
-        el.textContent = LOADING_MESSAGES[i];
-        el.classList.remove('fading');
-      }, 450);
-    }, 2500);
+      i = (i + 1) % LOADING_MESSAGES.length;
+      const next = active === 0 ? 1 : 0;
+      els[next].textContent = LOADING_MESSAGES[i];
+      els[next].classList.add('active');
+      els[active].classList.remove('active');
+      active = next;
+    }, 3000);
   }
   function stopMessageCycle() {
     clearInterval(messageTimer);
