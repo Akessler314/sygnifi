@@ -1097,11 +1097,16 @@
     searchUrl.searchParams.set('datetype', 'pdat');
 
     if (mode === 'foundational') {
+      // 5 years ago → 90 days ago (foundational, no overlap with recent)
       searchUrl.searchParams.set('retmax', '5');
-      const year = new Date().getFullYear();
-      searchUrl.searchParams.set('mindate', String(year - 5));
-      searchUrl.searchParams.set('maxdate', String(year));
+      const end = new Date();
+      end.setDate(end.getDate() - 90);
+      const start = new Date(end);
+      start.setFullYear(start.getFullYear() - 5);
+      searchUrl.searchParams.set('mindate', formatPubMedDate(start));
+      searchUrl.searchParams.set('maxdate', formatPubMedDate(end));
     } else {
+      // last 90 days → today (recent)
       searchUrl.searchParams.set('retmax', '10');
       const end = new Date();
       const start = new Date();
@@ -1263,10 +1268,10 @@ THEY WANT TO TRACK: ${watchLabels || 'unspecified'}
 
 KEY TERMS: ${context.terms}
 
-RECENT PAPERS FETCHED FROM PUBMED (sorted by date — this week's snapshot):
+RECENT PAPERS FETCHED FROM PUBMED (sorted by relevance, last 90 days — what's most relevant right now):
 ${recentBlock}
 
-FOUNDATIONAL PAPERS FETCHED FROM PUBMED (sorted by relevance, past 5 years — the "must-knows" for someone new to this area):
+FOUNDATIONAL PAPERS FETCHED FROM PUBMED (sorted by relevance, 5 years ago to 90 days ago — the older, well-established work someone new to this area should have read; these do NOT overlap with the recent list above):
 ${foundationalBlock}
 
 Generate a JSON response with exactly this structure:
@@ -1390,6 +1395,21 @@ Return only valid JSON, no markdown, no preamble.`;
       report.top_papers = Array.isArray(report.top_papers) ? report.top_papers : [];
       report.patents = Array.isArray(report.patents) ? report.patents : [];
       report.competitors = Array.isArray(report.competitors) ? report.competitors : [];
+
+      // Fallback: if the model returned no top_papers but PubMed gave us
+      // foundational results, render them from the raw data rather than
+      // showing an empty section.
+      if (report.top_papers.length === 0 && foundational.length > 0) {
+        report.top_papers = foundational.map(p => ({
+          title: p.title,
+          pmid: p.pmid,
+          journal: p.journal,
+          date: p.pubDate,
+          authors: p.authors,
+          summary: p.abstract ? p.abstract.slice(0, 320).replace(/\s+\S*$/, '') + '…' : '',
+          why_it_matters: ''
+        }));
+      }
       if (!report.summary_stats || typeof report.summary_stats !== 'object') {
         report.summary_stats = {
           papers_found: report.papers.length,
