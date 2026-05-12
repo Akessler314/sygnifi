@@ -1273,7 +1273,7 @@ Generate a JSON response with exactly this structure:
 
 For papers AND top_papers: only use the real PubMed entries provided in the corresponding section above. Do not invent papers. Preserve the exact titles, PMIDs, journals, dates, and authors from the data. For papers (recent), set relevance honestly based on how close each one is to the team's stated research and key terms. The why_it_matters line for both lists must reference something specific about the team's research context, not a generic statement.
 
-For top_papers: select up to 5 of the most foundational papers from the foundational list — papers that any new team member working in this area should have read. Skip any from the foundational list that aren't genuinely foundational.
+For top_papers: include EVERY paper from the foundational PubMed list above, in the order provided (PubMed already ranked them by relevance). Do not skip any, do not re-rank. PubMed's relevance ranking is the filter — your job is to write a strong why_it_matters for each one tied to the team's research, not to second-guess what counts as "foundational".
 
 For patents and competitors: generate plausible, analytically grounded content based on the field. 2–4 patents and 2–4 competitors is right. Use conflict_flag to flag an FTO concern if and only if it's directly relevant; otherwise null. These sections are AI-synthesized estimates, not retrieved from a patent database — bias toward conservative, broadly correct content rather than overly specific fabrications.
 
@@ -1321,13 +1321,12 @@ Return only valid JSON, no markdown, no preamble.`;
     document.getElementById('loading-error').classList.remove('visible');
     startMessageCycle();
     try {
-      const [recent, foundationalRaw] = await Promise.all([
+      const [recent, foundational] = await Promise.all([
         fetchPubMedPapers(context.terms, 'recent'),
         fetchPubMedPapers(context.terms, 'foundational')
       ]);
-      // Drop any foundational result that's already in the recent set.
-      const recentPmids = new Set(recent.map(p => p.pmid).filter(Boolean));
-      const foundational = foundationalRaw.filter(p => !p.pmid || !recentPmids.has(p.pmid));
+      // No dedupe: if a paper is both this week's news AND foundational,
+      // surfacing it in both sections is the right signal, not a bug.
       const report = await callAnthropic(recent, foundational);
 
       // Light validation + sanitization
