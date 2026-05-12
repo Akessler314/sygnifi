@@ -125,7 +125,28 @@
     z-index: 1;
     max-width: 640px;
     margin: 0 auto;
-    padding: 72px 32px 80px;
+    padding: 72px 32px 24px;
+  }
+
+  .wizard-privacy {
+    position: relative;
+    z-index: 1;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 24px 32px 56px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+    font-style: italic;
+  }
+
+  .wizard-privacy::before {
+    content: '🔒 ';
+    font-style: normal;
+    margin-right: 2px;
   }
 
   .step { animation: fadeUp 0.45s var(--ease-out) both; }
@@ -620,7 +641,7 @@
       id="input-focus"
       class="textarea"
       rows="4"
-      placeholder="e.g. We're developing a small molecule inhibitor targeting RUNX2 phosphorylation in treatment-resistant osteosarcoma..."
+      placeholder="e.g. We're developing a next-generation KRAS G12C inhibitor designed to retain activity against secondary resistance mutations (R68S, Y96C) in non-small cell lung cancer..."
     ></textarea>
     <div class="helper" id="helper-focus">A couple of sentences is plenty.</div>
     <div class="nav-row">
@@ -724,7 +745,7 @@
       id="input-terms"
       class="textarea"
       rows="3"
-      placeholder="e.g. RUNX2, Ser451, CBFβ, osteosarcoma, lipid nanoparticle delivery..."
+      placeholder="e.g. KRAS G12C, sotorasib, adagrasib, NSCLC, RAS inhibitor resistance..."
     ></textarea>
     <div class="helper">Comma-separated. We'll use these to query PubMed directly.</div>
     <div class="nav-row">
@@ -736,7 +757,7 @@
   </section>
 
   <!-- STEP 6 — Loading -->
-  <section class="step loading-step" id="step-6" hidden>
+  <section class="step loading-step" id="step-6" hidden data-loading>
     <div class="radar" aria-hidden="true">
       <div class="radar-ring"></div>
       <div class="radar-ring"></div>
@@ -758,6 +779,10 @@
   </section>
 
 </main>
+
+<aside class="wizard-privacy" id="wizard-privacy">
+  Your answers are used only to generate your report. We don't save them, log them, or use them for anything else.
+</aside>
 
 <script>
   // ── Auth guard ────────────────────────────────────────────────
@@ -814,8 +839,10 @@
     el.hidden = false;
     currentStep = n;
     updateProgress();
+    // Hide the privacy footnote on the loading step (full-bleed full-height).
+    const privacy = document.getElementById('wizard-privacy');
+    if (privacy) privacy.hidden = n > TOTAL_STEPS;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // focus first input on the new step
     const firstInput = el.querySelector('textarea, .option-card, .pill');
     if (firstInput && n <= TOTAL_STEPS) setTimeout(() => firstInput.focus(), 80);
   }
@@ -1001,7 +1028,9 @@
   });
 
   // ── PubMed fetch ──────────────────────────────────────────────
-  async function fetchPubMedPapers(terms) {
+  // mode='recent'      — sort by date, top 10
+  // mode='foundational' — sort by relevance, past 5 years, top 5
+  async function fetchPubMedPapers(terms, mode = 'recent') {
     const cleanTerms = terms
       .split(/[,\n]/)
       .map(t => t.trim())
@@ -1014,9 +1043,18 @@
     const searchUrl = new URL('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi');
     searchUrl.searchParams.set('db', 'pubmed');
     searchUrl.searchParams.set('term', query);
-    searchUrl.searchParams.set('retmax', '10');
-    searchUrl.searchParams.set('sort', 'date');
     searchUrl.searchParams.set('retmode', 'json');
+    if (mode === 'foundational') {
+      searchUrl.searchParams.set('retmax', '5');
+      searchUrl.searchParams.set('sort', 'relevance');
+      const year = new Date().getFullYear();
+      searchUrl.searchParams.set('mindate', String(year - 5));
+      searchUrl.searchParams.set('maxdate', String(year));
+      searchUrl.searchParams.set('datetype', 'pdat');
+    } else {
+      searchUrl.searchParams.set('retmax', '10');
+      searchUrl.searchParams.set('sort', 'date');
+    }
 
     let pmids = [];
     try {
@@ -1026,7 +1064,7 @@
         pmids = (j.esearchresult && j.esearchresult.idlist) || [];
       }
     } catch (e) {
-      console.warn('PubMed esearch failed', e);
+      console.warn(`PubMed esearch (${mode}) failed`, e);
       return [];
     }
     if (pmids.length === 0) return [];
@@ -1044,7 +1082,7 @@
       if (!r.ok) return [];
       xmlText = await r.text();
     } catch (e) {
-      console.warn('PubMed efetch failed', e);
+      console.warn(`PubMed efetch (${mode}) failed`, e);
       return [];
     }
 
@@ -1129,7 +1167,20 @@
     'pre-fundraise': 'Pre-fundraise — preparing to raise'
   };
 
-  function buildUserPrompt(papers) {
+  function formatPapersForPrompt(list) {
+    if (!list || list.length === 0) return '(none)';
+    return list.map((p, i) => {
+      const abs = (p.abstract || '').slice(0, 1600);
+      return `[${i + 1}] TITLE: ${p.title}
+PMID: ${p.pmid || 'unknown'}
+JOURNAL: ${p.journal || 'unknown'}
+DATE: ${p.pubDate || 'unknown'}
+AUTHORS: ${p.authors || 'unknown'}
+ABSTRACT: ${abs || '(no abstract available)'}`;
+    }).join('\n\n');
+  }
+
+  function buildUserPrompt(recentPapers, foundationalPapers) {
     const watchLabels = (context.watch || []).map(w => WATCH_LABELS[w] || w).join(', ');
     const stageLabel = (context.stages || []).length
       ? context.stages.map(s => STAGE_LABELS[s] || s).join(' · ')
@@ -1138,19 +1189,12 @@
       ? context.competitors.trim()
       : 'none specified';
 
-    let papersBlock;
-    if (papers.length === 0) {
-      papersBlock = 'No PubMed results were returned for these terms. Return an empty papers array — do not invent any.';
-    } else {
-      papersBlock = papers.map((p, i) => {
-        const abs = (p.abstract || '').slice(0, 1600);
-        return `[${i + 1}] TITLE: ${p.title}
-JOURNAL: ${p.journal || 'unknown'}
-DATE: ${p.pubDate || 'unknown'}
-AUTHORS: ${p.authors || 'unknown'}
-ABSTRACT: ${abs || '(no abstract available)'}`;
-      }).join('\n\n');
-    }
+    const recentBlock = recentPapers.length
+      ? formatPapersForPrompt(recentPapers)
+      : 'No recent PubMed results were returned for these terms. Return an empty papers array — do not invent any.';
+    const foundationalBlock = foundationalPapers.length
+      ? formatPapersForPrompt(foundationalPapers)
+      : 'No foundational PubMed results were returned. Return an empty top_papers array — do not invent any.';
 
     return `Generate a field intelligence report for a research team.
 
@@ -1165,8 +1209,11 @@ THEY WANT TO TRACK: ${watchLabels || 'unspecified'}
 
 KEY TERMS: ${context.terms}
 
-REAL PAPERS FETCHED FROM PUBMED:
-${papersBlock}
+RECENT PAPERS FETCHED FROM PUBMED (sorted by date — this week's snapshot):
+${recentBlock}
+
+FOUNDATIONAL PAPERS FETCHED FROM PUBMED (sorted by relevance, past 5 years — the "must-knows" for someone new to this area):
+${foundationalBlock}
 
 Generate a JSON response with exactly this structure:
 {
@@ -1178,12 +1225,24 @@ Generate a JSON response with exactly this structure:
   "papers": [
     {
       "title": "real paper title from pubmed",
+      "pmid": "PMID string from the PubMed data above",
       "journal": "journal name",
       "date": "pub date",
       "authors": "author string",
       "summary": "2-3 sentence plain-English summary",
       "relevance": "high|medium|watch",
       "why_it_matters": "1-2 sentences specific to their research context"
+    }
+  ],
+  "top_papers": [
+    {
+      "title": "real paper title from the foundational PubMed list",
+      "pmid": "PMID string from the PubMed data above",
+      "journal": "journal name",
+      "date": "pub date",
+      "authors": "author string",
+      "summary": "2-3 sentence plain-English summary",
+      "why_it_matters": "1-2 sentences on why this paper is essential context for their research"
     }
   ],
   "patents": [
@@ -1212,18 +1271,20 @@ Generate a JSON response with exactly this structure:
   }
 }
 
-For papers: only use the real PubMed papers provided. Do not invent papers. Preserve the exact titles, journals, dates, and authors from the data above. Set relevance honestly based on how close each paper is to the team's stated research and key terms. The why_it_matters line must reference something specific about the team's research context, not a generic statement.
+For papers AND top_papers: only use the real PubMed entries provided in the corresponding section above. Do not invent papers. Preserve the exact titles, PMIDs, journals, dates, and authors from the data. For papers (recent), set relevance honestly based on how close each one is to the team's stated research and key terms. The why_it_matters line for both lists must reference something specific about the team's research context, not a generic statement.
 
-For patents and competitors: generate plausible, analytically grounded content based on the field. 2–4 patents and 2–4 competitors is right. Use conflict_flag to flag an FTO concern if and only if it's directly relevant; otherwise null.
+For top_papers: select up to 5 of the most foundational papers from the foundational list — papers that any new team member working in this area should have read. Skip any from the foundational list that aren't genuinely foundational.
 
-For summary_stats: papers_found should equal the length of the papers array; high_relevance should equal the count of papers with relevance "high"; patents should equal the length of the patents array.
+For patents and competitors: generate plausible, analytically grounded content based on the field. 2–4 patents and 2–4 competitors is right. Use conflict_flag to flag an FTO concern if and only if it's directly relevant; otherwise null. These sections are AI-synthesized estimates, not retrieved from a patent database — bias toward conservative, broadly correct content rather than overly specific fabrications.
+
+For summary_stats: papers_found = length of the papers array; high_relevance = count of papers with relevance "high"; patents = length of the patents array.
 
 Return only valid JSON, no markdown, no preamble.`;
   }
 
   const SYSTEM_PROMPT = `You are a research intelligence analyst for early-stage biotech companies. Your job is to synthesise scientific literature and field signals into actionable intelligence, contextualised against a specific team's research. Be specific, direct, and analytically sharp. Never be generic.`;
 
-  async function callAnthropic(papers) {
+  async function callAnthropic(recentPapers, foundationalPapers) {
     const res = await fetch(PROXY_URL, {
       method: 'POST',
       headers: {
@@ -1234,7 +1295,7 @@ Return only valid JSON, no markdown, no preamble.`;
         model: 'claude-sonnet-4-6',
         max_tokens: 8000,
         system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: buildUserPrompt(papers) }]
+        messages: [{ role: 'user', content: buildUserPrompt(recentPapers, foundationalPapers) }]
       })
     });
     if (res.status === 401) {
@@ -1260,12 +1321,19 @@ Return only valid JSON, no markdown, no preamble.`;
     document.getElementById('loading-error').classList.remove('visible');
     startMessageCycle();
     try {
-      const papers = await fetchPubMedPapers(context.terms);
-      const report = await callAnthropic(papers);
+      const [recent, foundationalRaw] = await Promise.all([
+        fetchPubMedPapers(context.terms, 'recent'),
+        fetchPubMedPapers(context.terms, 'foundational')
+      ]);
+      // Drop any foundational result that's already in the recent set.
+      const recentPmids = new Set(recent.map(p => p.pmid).filter(Boolean));
+      const foundational = foundationalRaw.filter(p => !p.pmid || !recentPmids.has(p.pmid));
+      const report = await callAnthropic(recent, foundational);
 
       // Light validation + sanitization
       if (!report || typeof report !== 'object') throw new Error('Malformed response.');
       report.papers = Array.isArray(report.papers) ? report.papers : [];
+      report.top_papers = Array.isArray(report.top_papers) ? report.top_papers : [];
       report.patents = Array.isArray(report.patents) ? report.patents : [];
       report.competitors = Array.isArray(report.competitors) ? report.competitors : [];
       if (!report.summary_stats || typeof report.summary_stats !== 'object') {

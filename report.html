@@ -296,6 +296,50 @@
 
   .paper-title { font-size: 14px; font-weight: 600; line-height: 1.4; flex: 1; color: var(--ink-deep); }
 
+  .paper-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s var(--ease-out);
+  }
+  .paper-title a:hover { color: var(--accent); }
+  .paper-title a::after {
+    content: ' ↗';
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--border);
+    vertical-align: super;
+    transition: color 0.15s var(--ease-out);
+  }
+  .paper-title a:hover::after { color: var(--accent); }
+
+  .synth-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    background: var(--paper-dark);
+    color: var(--muted);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: 500;
+    border: 1px solid var(--border);
+  }
+
+  .pulse-tag-row {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid oklch(0.40 0.07 253);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .pulse-tag-row .synth-tag {
+    background: oklch(0.34 0.07 253);
+    color: oklch(0.78 0.04 234);
+    border-color: oklch(0.40 0.07 253);
+  }
+
   .relevance-badge {
     font-size: 11px;
     font-family: 'DM Mono', monospace;
@@ -606,6 +650,19 @@
   ::-webkit-scrollbar-track { background: var(--paper); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+  @media (max-width: 640px) {
+    .topbar-right > span:first-child { display: none; }
+    .topbar-right { gap: 10px; }
+  }
+
+  @media (max-width: 420px) {
+    .topbar { padding: 0 12px; }
+    .logo { font-size: 18px; }
+    .logo img { height: 22px; }
+    .badge-live { font-size: 9px; padding: 2px 6px; }
+    .topbar-right .new-report { font-size: 10px; letter-spacing: 0.7px; }
+  }
+
   @media (max-width: 768px) {
     .topbar { padding: 0 16px; }
 
@@ -740,8 +797,16 @@
     <hr class="section-divider">
 
     <div class="section-header">
+      <div class="section-title">Foundational reading</div>
+      <span class="section-aux">Past 5 years</span>
+    </div>
+    <div id="top-papers-list"></div>
+
+    <hr class="section-divider">
+
+    <div class="section-header">
       <div class="section-title">Patent Filings</div>
-      <span class="section-aux"><em>Illustrative</em></span>
+      <span class="section-aux"><span class="synth-tag">Illustrative</span></span>
     </div>
     <div id="patents-list"></div>
 
@@ -753,11 +818,13 @@
     <div class="field-pulse">
       <div class="pulse-title">🧭 Where the field is heading</div>
       <div class="pulse-body" id="field-pulse-body">—</div>
+      <div class="pulse-tag-row"><span class="synth-tag">Illustrative</span></div>
     </div>
 
     <div class="side-section">
       <div class="section-header">
         <div class="section-title">Competitor Activity</div>
+        <span class="section-aux"><span class="synth-tag">Illustrative</span></span>
       </div>
       <div id="competitors-list"></div>
     </div>
@@ -782,7 +849,7 @@
 
 <!-- FOOTER -->
 <div class="report-footer">
-  <div id="footer-sources">Sources: PubMed E-utilities · Patents illustrative · Generated —</div>
+  <div id="footer-sources">Real papers from PubMed E-utilities · Patents, competitors & field analysis illustrative · Generated —</div>
   <div class="footer-brand">
     <img src="logo.png" alt="Sygnifi">
     Sygnifi
@@ -888,14 +955,47 @@
   document.getElementById('papers-count').textContent =
     papers.length ? `${papers.length} this week` : '';
 
+  function paperTitleHtml(p) {
+    const title = esc(p.title);
+    if (!p.pmid) return title;
+    const pmid = esc(p.pmid);
+    return `<a href="https://pubmed.ncbi.nlm.nih.gov/${pmid}/" target="_blank" rel="noopener noreferrer">${title}</a>`;
+  }
+
   if (papers.length === 0) {
     papersList.innerHTML = `<div class="empty-note">No new PubMed results matched your terms this week. Try broader terms next time, or check back on Monday.</div>`;
   } else {
     papersList.innerHTML = papers.map((p, i) => `
       <article class="paper-card" style="animation-delay:${(0.15 + i * 0.08).toFixed(2)}s">
         <div class="paper-top">
-          <div class="paper-title">${esc(p.title)}</div>
+          <div class="paper-title">${paperTitleHtml(p)}</div>
           <span class="relevance-badge ${relevanceClass(p.relevance)}">${esc(relevanceLabel(p.relevance))}</span>
+        </div>
+        <div class="paper-summary">${esc(p.summary)}</div>
+        ${p.why_it_matters ? `
+        <div class="why-matters">
+          <strong>Why this matters to you</strong>
+          ${esc(p.why_it_matters)}
+        </div>` : ''}
+        <div class="paper-footer">
+          ${p.journal ? `<span>📄 ${esc(p.journal)}</span>` : ''}
+          ${p.date    ? `<span>📅 ${esc(p.date)}</span>` : ''}
+          ${p.authors ? `<span>👥 ${esc(p.authors)}</span>` : ''}
+        </div>
+      </article>
+    `).join('');
+  }
+
+  // Foundational reading
+  const topPapers = report.top_papers || [];
+  const topPapersList = document.getElementById('top-papers-list');
+  if (topPapers.length === 0) {
+    topPapersList.innerHTML = `<div class="empty-note">No foundational papers surfaced for these terms. The model only includes real papers from PubMed — try broader terms next time if this stays empty.</div>`;
+  } else {
+    topPapersList.innerHTML = topPapers.map((p, i) => `
+      <article class="paper-card" style="animation-delay:${(0.15 + i * 0.08).toFixed(2)}s">
+        <div class="paper-top">
+          <div class="paper-title">${paperTitleHtml(p)}</div>
         </div>
         <div class="paper-summary">${esc(p.summary)}</div>
         ${p.why_it_matters ? `
@@ -959,7 +1059,7 @@
 
   // Footer
   document.getElementById('footer-sources').textContent =
-    `Sources: PubMed E-utilities · Patents illustrative · Generated ${longDate(now)}`;
+    `Real papers from PubMed E-utilities · Patents, competitors & field analysis illustrative · Generated ${longDate(now)}`;
 </script>
 
 </body>
