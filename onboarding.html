@@ -238,26 +238,31 @@
     box-shadow: 0 0 0 1px var(--accent) inset, 0 6px 18px oklch(0.60 0.140 52 / 0.10);
   }
 
-  .option-radio {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
+  .option-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
     border: 1.5px solid var(--border);
     flex-shrink: 0;
     position: relative;
-    transition: border-color 0.15s var(--ease-out);
+    transition: border-color 0.15s var(--ease-out), background 0.15s var(--ease-out);
   }
 
-  .option-card.selected .option-radio {
+  .option-card.selected .option-check {
     border-color: var(--accent);
+    background: var(--accent);
   }
 
-  .option-card.selected .option-radio::after {
+  .option-card.selected .option-check::after {
     content: '';
     position: absolute;
-    inset: 3px;
-    background: var(--accent);
-    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 10px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: translate(-50%, -60%) rotate(45deg);
   }
 
   .option-text { flex: 1; }
@@ -611,35 +616,35 @@
     </div>
   </section>
 
-  <!-- STEP 2 — Research stage -->
+  <!-- STEP 2 — Research stage(s) -->
   <section class="step" id="step-2" data-step="2" hidden>
     <div class="step-num">02 · Where you are</div>
     <h1 class="step-heading">Where are you right now?</h1>
-    <p class="step-sub">This helps us weight what's most relevant to you.</p>
-    <div class="option-list" id="stage-list" role="radiogroup" aria-label="Research stage">
-      <button class="option-card" type="button" data-value="pre-discovery" role="radio" aria-checked="false">
-        <span class="option-radio"></span>
+    <p class="step-sub">Select everything that applies — many teams are in more than one stage at once.</p>
+    <div class="option-list" id="stage-list" role="group" aria-label="Research stage">
+      <button class="option-card" type="button" data-value="pre-discovery" role="checkbox" aria-checked="false">
+        <span class="option-check"></span>
         <span class="option-text">
           <span class="option-title">Pre-discovery</span>
           <span class="option-desc">Exploring the landscape</span>
         </span>
       </button>
-      <button class="option-card" type="button" data-value="active-discovery" role="radio" aria-checked="false">
-        <span class="option-radio"></span>
+      <button class="option-card" type="button" data-value="active-discovery" role="checkbox" aria-checked="false">
+        <span class="option-check"></span>
         <span class="option-text">
           <span class="option-title">Active discovery</span>
           <span class="option-desc">Experiments underway</span>
         </span>
       </button>
-      <button class="option-card" type="button" data-value="pre-filing" role="radio" aria-checked="false">
-        <span class="option-radio"></span>
+      <button class="option-card" type="button" data-value="pre-filing" role="checkbox" aria-checked="false">
+        <span class="option-check"></span>
         <span class="option-text">
           <span class="option-title">Pre-filing</span>
           <span class="option-desc">Approaching patent or publication</span>
         </span>
       </button>
-      <button class="option-card" type="button" data-value="pre-fundraise" role="radio" aria-checked="false">
-        <span class="option-radio"></span>
+      <button class="option-card" type="button" data-value="pre-fundraise" role="checkbox" aria-checked="false">
+        <span class="option-check"></span>
         <span class="option-text">
           <span class="option-title">Pre-fundraise</span>
           <span class="option-desc">Preparing to raise</span>
@@ -759,7 +764,7 @@
   let currentStep = 1;
   let context = {
     focus: '',
-    stage: '',
+    stages: [],
     competitors: '',
     watch: [],
     terms: ''
@@ -768,7 +773,15 @@
   // Restore any in-flight context (e.g. on accidental refresh).
   try {
     const saved = JSON.parse(sessionStorage.getItem('sygnifi_context') || 'null');
-    if (saved && typeof saved === 'object') Object.assign(context, saved);
+    if (saved && typeof saved === 'object') {
+      Object.assign(context, saved);
+      // Migrate legacy single-stage value to the new multi-stage array.
+      if (typeof saved.stage === 'string' && !Array.isArray(saved.stages)) {
+        context.stages = saved.stage ? [saved.stage] : [];
+      }
+      delete context.stage;
+      if (!Array.isArray(context.stages)) context.stages = [];
+    }
   } catch {}
 
   function saveContext() {
@@ -835,27 +848,33 @@
     showStep(2);
   });
 
-  // ── Step 2 — stage ────────────────────────────────────────────
+  // ── Step 2 — stages (multi) ───────────────────────────────────
   const stageList = document.getElementById('stage-list');
   const next2 = document.getElementById('next-2');
 
-  function setStage(value) {
-    context.stage = value;
+  function refreshStages() {
     stageList.querySelectorAll('.option-card').forEach(card => {
-      const sel = card.dataset.value === value;
+      const sel = context.stages.includes(card.dataset.value);
       card.classList.toggle('selected', sel);
       card.setAttribute('aria-checked', sel ? 'true' : 'false');
     });
-    next2.disabled = !value;
+    next2.disabled = context.stages.length === 0;
+  }
+
+  function toggleStage(value) {
+    const i = context.stages.indexOf(value);
+    if (i === -1) context.stages.push(value);
+    else context.stages.splice(i, 1);
+    refreshStages();
   }
 
   stageList.querySelectorAll('.option-card').forEach(card => {
-    card.addEventListener('click', () => setStage(card.dataset.value));
+    card.addEventListener('click', () => toggleStage(card.dataset.value));
   });
-  if (context.stage) setStage(context.stage);
+  refreshStages();
 
   next2.addEventListener('click', () => {
-    if (!context.stage) return;
+    if (context.stages.length === 0) return;
     saveContext();
     showStep(3);
   });
@@ -1089,7 +1108,9 @@
 
   function buildUserPrompt(papers) {
     const watchLabels = (context.watch || []).map(w => WATCH_LABELS[w] || w).join(', ');
-    const stageLabel = STAGE_LABELS[context.stage] || context.stage;
+    const stageLabel = (context.stages || []).length
+      ? context.stages.map(s => STAGE_LABELS[s] || s).join(' · ')
+      : 'unspecified';
     const compsLine = context.competitors && context.competitors.trim()
       ? context.competitors.trim()
       : 'none specified';
