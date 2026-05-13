@@ -739,15 +739,15 @@
   <!-- STEP 5 — Key terms -->
   <section class="step" id="step-5" data-step="5" hidden>
     <div class="step-num">05 · Vocabulary</div>
-    <h1 class="step-heading">Anything specific to add?</h1>
-    <p class="step-sub">We'll pull identifiers like <em>KRAS</em>, <em>G12C</em>, or <em>sotorasib</em> from your description in step 1 automatically. Add anything else we should search for — or leave blank if step 1 covers it.</p>
+    <h1 class="step-heading">Confirm the search terms.</h1>
+    <p class="step-sub">We pulled these from your step 1 description — gene names, diseases, mechanisms. Remove anything that doesn't fit, add anything we missed.</p>
     <textarea
       id="input-terms"
       class="textarea"
-      rows="3"
-      placeholder="e.g. RMC-6291, MRTX849, SHP2, MEK inhibitor combinations..."
+      rows="4"
+      placeholder="Pulling search terms from your description in step 1…"
     ></textarea>
-    <div class="helper" id="helper-terms">Comma-separated works best — but we'll also pick up identifiers from spaces.</div>
+    <div class="helper" id="helper-terms">Comma-separated. ALL-CAPS terms are treated as gene/drug names; the rest as disease/anatomy/mechanism.</div>
     <div class="nav-row">
       <button class="btn-back" type="button" data-back>← Back</button>
       <div class="nav-right">
@@ -872,6 +872,92 @@
     return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
   }
 
+  // Split a flat user-edited term list back into identifiers vs context.
+  // Identifier = ALL-CAPS token (RUNX2, AMG-510), p-number (p53), or
+  //              word ending in a known drug suffix (sotorasib, trastuzumab).
+  // Everything else = context (disease, anatomy, mechanism, modality).
+  function splitFlatTermList(text) {
+    const all = (text || '').split(/[,;\n]+/)
+      .map(t => t.trim())
+      .filter(t => t.length >= 2);
+    const ids = [];
+    const ctx = [];
+    all.forEach(t => {
+      const oneToken = /^\S+$/.test(t);
+      const allCaps  = /^[A-Z][A-Z0-9-]*$/.test(t);
+      const pNumber  = /^p[0-9]+[a-z]*$/i.test(t);
+      const drugSfx  = /[a-z]{3,}(?:rasib|tinib|nib|mab|cept|stat|prazole|olol|sartan|pril)$/i.test(t);
+      if (oneToken && (allCaps || pNumber || drugSfx)) ids.push(t);
+      else ctx.push(t);
+    });
+    return { identifiers: ids, context: ctx };
+  }
+
+  // Build a PubMed query from structured terms.
+  //   (identifiers OR'd) AND (context OR'd)
+  // Falls back to one bucket if the other is empty.
+  function buildPubMedQuery(identifiers, ctxTerms) {
+    const id  = identifiers.length ? `(${identifiers.map(t => `"${t}"`).join(' OR ')})` : '';
+    const ctx = ctxTerms.length    ? `(${ctxTerms.map(t => `"${t}"`).join(' OR ')})`    : '';
+    if (id && ctx) return `${id} AND ${ctx}`;
+    return id || ctx || '';
+  }
+
+  // Strip ```...``` fences a model sometimes wraps JSON in.
+  function stripJsonFences(s) {
+    let t = (s || '').trim();
+    t = t.replace(/^```(?:json)?\s*/i, '');
+    t = t.replace(/```\s*$/, '');
+    const first = t.indexOf('{');
+    const last = t.lastIndexOf('}');
+    if (first !== -1 && last !== -1 && last > first) {
+      t = t.slice(first, last + 1);
+    }
+    return t.trim();
+  }
+
+  // Claude pre-extraction: turn a plain-English description into
+  // structured PubMed search terms. Falls back to {identifiers:[],context:[]}
+  // on any failure.
+  async function extractTermsViaClaude(focus) {
+    if (!focus || focus.trim().length < 20) return { identifiers: [], context: [] };
+    const system = 'You extract PubMed search terms from biomedical research descriptions. Return only valid JSON with no preamble or markdown.';
+    const user = `Extract two lists of search terms from this research description.
+
+- "identifiers": gene/protein symbols (RUNX2, KRAS, BRCA1), compound IDs (AMG-510, MRTX849), or specific drug names (sotorasib, trastuzumab). Canonical form. Don't include lowercase descriptors here.
+- "context": disease names, anatomical sites, mechanisms, modalities (e.g. "bone metastasis", "prostate cancer", "non-small cell lung cancer", "transcription factor inhibitor", "peptide inhibitor"). Use specific phrases. Skip generic words like "cancer", "treatment", "research".
+
+Aim for 4-8 identifiers and 2-5 context terms when the description supports it. Return [] for a category if the description doesn't mention any.
+
+Return ONLY valid JSON in this exact shape, no markdown:
+{"identifiers": [...], "context": [...]}
+
+DESCRIPTION:
+${focus}`;
+
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Code': ACCESS_CODE },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 800,
+        system,
+        messages: [{ role: 'user', content: user }]
+      })
+    });
+    if (!res.ok) throw new Error(`extract: proxy ${res.status}`);
+    const data = await res.json();
+    const text = data?.content?.[0]?.text || '{}';
+    const parsed = JSON.parse(stripJsonFences(text));
+    return {
+      identifiers: Array.isArray(parsed.identifiers) ? parsed.identifiers.filter(Boolean) : [],
+      context: Array.isArray(parsed.context) ? parsed.context.filter(Boolean) : []
+    };
+  }
+
+  // Holds the in-flight extraction so step 5 can await it.
+  let extractedTermsPromise = null;
+
   // ── Navigation ────────────────────────────────────────────────
   function showStep(n) {
     document.querySelectorAll('.step').forEach(el => el.hidden = true);
@@ -886,6 +972,48 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const firstInput = el.querySelector('textarea, .option-card, .pill');
     if (firstInput && n <= TOTAL_STEPS) setTimeout(() => firstInput.focus(), 80);
+    if (n === 5) prefillTerms();
+  }
+
+  async function prefillTerms() {
+    const inputEl = document.getElementById('input-terms');
+    const helperEl = document.getElementById('helper-terms');
+    const nextEl = document.getElementById('next-5');
+    if (!inputEl) return;
+    // Don't overwrite anything the user has already typed or that was
+    // restored from sessionStorage.
+    if (inputEl.value.trim().length > 0) {
+      validateStep5();
+      return;
+    }
+    const savedPlaceholder = inputEl.placeholder;
+    inputEl.placeholder = 'Pulling search terms from your description in step 1…';
+    inputEl.disabled = true;
+    nextEl.disabled = true;
+    helperEl.textContent = 'Analysing your description…';
+    helperEl.classList.remove('warn');
+
+    try {
+      const claudeResult = await (extractedTermsPromise || Promise.resolve(null));
+      let combined = [];
+      if (claudeResult && (claudeResult.identifiers.length || claudeResult.context.length)) {
+        combined = [...claudeResult.identifiers, ...claudeResult.context];
+      } else {
+        // Fallback: regex extraction from step 1.
+        combined = extractSearchTerms(context.focus, '');
+      }
+      if (combined.length > 0) {
+        inputEl.value = combined.join(', ');
+      }
+    } catch (e) {
+      console.warn('prefillTerms failed', e);
+      const fallback = extractSearchTerms(context.focus, '');
+      if (fallback.length > 0) inputEl.value = fallback.join(', ');
+    } finally {
+      inputEl.placeholder = savedPlaceholder;
+      inputEl.disabled = false;
+      validateStep5();
+    }
   }
 
   function updateProgress() {
@@ -931,6 +1059,11 @@
     if (!validateStep1()) return;
     context.focus = inputFocus.value.trim();
     saveContext();
+    // Kick off term extraction in the background. By the time the user
+    // walks through steps 2-4, this is usually done and step 5 can
+    // prefill instantly. If it errors, we fall back to regex.
+    extractedTermsPromise = extractTermsViaClaude(context.focus)
+      .catch(e => { console.warn('Claude term extraction failed', e); return null; });
     showStep(2);
   });
 
@@ -1019,17 +1152,22 @@
   inputTerms.value = context.terms || '';
 
   function validateStep5() {
-    const extracted = extractSearchTerms(context.focus, inputTerms.value);
-    const ok = extracted.length > 0;
+    const { identifiers, context: ctxTerms } = splitFlatTermList(inputTerms.value);
+    const total = identifiers.length + ctxTerms.length;
+    const ok = total > 0;
     next5.disabled = !ok;
 
-    if (extracted.length === 0) {
-      helperTerms.textContent = "Add at least one specific term — we couldn't find any identifiers in your step 1 description either.";
+    if (total === 0) {
+      helperTerms.textContent = 'Add at least one search term — a gene, drug, disease, or anatomy.';
       helperTerms.classList.add('warn');
     } else {
-      const preview = extracted.slice(0, 6).join(', ');
-      const more = extracted.length > 6 ? ` + ${extracted.length - 6} more` : '';
-      helperTerms.textContent = `Searching PubMed for: ${preview}${more}`;
+      let line = `${total} term${total === 1 ? '' : 's'} ready.`;
+      if (identifiers.length && ctxTerms.length) {
+        line += ' We\'ll search papers that mention any of your gene/drug terms AND any of your disease/context terms.';
+      } else if (identifiers.length) {
+        line += ' Tip: add a disease or anatomy term (e.g. "bone metastasis") to narrow this down.';
+      }
+      helperTerms.textContent = line;
       helperTerms.classList.remove('warn');
     }
     return ok;
@@ -1082,11 +1220,9 @@
 
   // ── PubMed fetch ──────────────────────────────────────────────
   // mode='recent'       — top 10 most relevant from the last 90 days
-  // mode='foundational' — top 5 most relevant from the last 5 years
-  async function fetchPubMedPapers(termList, mode = 'recent') {
-    if (!termList || termList.length === 0) return [];
-
-    const query = termList.map(t => `"${t}"`).join(' OR ');
+  // mode='foundational' — top 5 most relevant, 5 years ago → 90 days ago
+  async function fetchPubMedPapers(query, mode = 'recent') {
+    if (!query) return [];
 
     // 1) esearch
     const searchUrl = new URL('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi');
@@ -1198,19 +1334,7 @@
   }
 
   // ── Anthropic call via proxy ──────────────────────────────────
-  function stripJsonFences(s) {
-    let t = s.trim();
-    // strip ``` or ```json fences if present
-    t = t.replace(/^```(?:json)?\s*/i, '');
-    t = t.replace(/```\s*$/, '');
-    // grab the first { ... } block as a fallback
-    const first = t.indexOf('{');
-    const last = t.lastIndexOf('}');
-    if (first !== -1 && last !== -1 && last > first) {
-      t = t.slice(first, last + 1);
-    }
-    return t.trim();
-  }
+  // (stripJsonFences defined in the utility block near the top.)
 
   const WATCH_LABELS = {
     papers: 'New papers',
@@ -1380,10 +1504,11 @@ Return only valid JSON, no markdown, no preamble.`;
     document.getElementById('loading-error').classList.remove('visible');
     startMessageCycle();
     try {
-      const searchTerms = extractSearchTerms(context.focus, context.terms);
+      const { identifiers, context: ctxTerms } = splitFlatTermList(context.terms);
+      const pubmedQuery = buildPubMedQuery(identifiers, ctxTerms);
       const [recent, foundational] = await Promise.all([
-        fetchPubMedPapers(searchTerms, 'recent'),
-        fetchPubMedPapers(searchTerms, 'foundational')
+        fetchPubMedPapers(pubmedQuery, 'recent'),
+        fetchPubMedPapers(pubmedQuery, 'foundational')
       ]);
       // No dedupe: if a paper is both this week's news AND foundational,
       // surfacing it in both sections is the right signal, not a bug.
