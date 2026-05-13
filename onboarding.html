@@ -1231,6 +1231,7 @@ ${focus}`;
     searchUrl.searchParams.set('retmode', 'json');
     searchUrl.searchParams.set('sort', 'relevance');
     searchUrl.searchParams.set('datetype', 'pdat');
+    searchUrl.searchParams.set('tool', 'sygnifi');
 
     if (mode === 'foundational') {
       // 5 years ago → 90 days ago (foundational, no overlap with recent)
@@ -1270,6 +1271,7 @@ ${focus}`;
     fetchUrl.searchParams.set('id', pmids.join(','));
     fetchUrl.searchParams.set('rettype', 'abstract');
     fetchUrl.searchParams.set('retmode', 'xml');
+    fetchUrl.searchParams.set('tool', 'sygnifi');
 
     let xmlText = '';
     try {
@@ -1506,10 +1508,18 @@ Return only valid JSON, no markdown, no preamble.`;
     try {
       const { identifiers, context: ctxTerms } = splitFlatTermList(context.terms);
       const pubmedQuery = buildPubMedQuery(identifiers, ctxTerms);
-      const [recent, foundational] = await Promise.all([
-        fetchPubMedPapers(pubmedQuery, 'recent'),
-        fetchPubMedPapers(pubmedQuery, 'foundational')
-      ]);
+      console.log('[Sygnifi] identifiers:', identifiers);
+      console.log('[Sygnifi] context:', ctxTerms);
+      console.log('[Sygnifi] PubMed query:', pubmedQuery);
+
+      // Sequential rather than parallel — NCBI throttles at 3 req/sec
+      // without an API key, and four concurrent requests can silently
+      // get one rejected. Sequential adds ~1-2s of latency but
+      // guarantees both windows actually run.
+      const recent = await fetchPubMedPapers(pubmedQuery, 'recent');
+      const foundational = await fetchPubMedPapers(pubmedQuery, 'foundational');
+      console.log('[Sygnifi] recent papers from PubMed:', recent.length);
+      console.log('[Sygnifi] foundational papers from PubMed:', foundational.length);
       // No dedupe: if a paper is both this week's news AND foundational,
       // surfacing it in both sections is the right signal, not a bug.
       const report = await callAnthropic(recent, foundational);
@@ -1521,10 +1531,12 @@ Return only valid JSON, no markdown, no preamble.`;
       report.patents = Array.isArray(report.patents) ? report.patents : [];
       report.competitors = Array.isArray(report.competitors) ? report.competitors : [];
 
+      console.log('[Sygnifi] model returned top_papers:', report.top_papers.length);
       // Fallback: if the model returned no top_papers but PubMed gave us
       // foundational results, render them from the raw data rather than
       // showing an empty section.
       if (report.top_papers.length === 0 && foundational.length > 0) {
+        console.log('[Sygnifi] fallback: populating top_papers from raw PubMed data');
         report.top_papers = foundational.map(p => ({
           title: p.title,
           pmid: p.pmid,
